@@ -2,7 +2,7 @@
 """
 Created on Sun Jul 16 14:40:46 2023
 
-@author: K. M. Yeoh
+@author: Kirk Ming Yeoh (e0546208@u.nus.edu)
 """
 
 import os
