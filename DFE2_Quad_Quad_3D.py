@@ -871,6 +871,11 @@ Replaced 'remove' function with 'del' function in lines 147 and 182
 'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended 
 
 End of Revision
+
+Proposed Revisions (yet to be implemented)
+Account for RVE sets and surfaces from the microscale input file, found from Part?
+Account for RVE level interactions, found from Instance
+Account for BCs applied at Initial step, which appears before the ------- line
 '''
 
 
