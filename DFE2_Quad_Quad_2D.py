@@ -587,7 +587,12 @@ Replaced 'remove' function with 'del' function in lines 102 and 137
 Added '+1' to line 180 of original code (currently line 185)
 When reading RVE material definitions, current code will miss the last line of the entire RVE input file
 
-End of Revision
+End of 240916 Revision
+
+Proposed Revisions (yet to be implemented)
+Account for RVE sets and surfaces from the microscale input file, found from Part?
+Account for RVE level interactions, found from Instance
+Account for BCs applied at Initial step, which appears before the ------- line
 '''     
         
             
