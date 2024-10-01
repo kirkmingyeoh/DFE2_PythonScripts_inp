@@ -875,7 +875,8 @@ End of Revision
 Proposed Revisions (yet to be implemented)
 Account for RVE sets and surfaces from the microscale input file, found from Part?
 Account for RVE level interactions, found from Instance
-Account for BCs applied at Initial step, which appears before the ------- line
+Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line
+Allow for (partial) reduced integration by changing the list of GP?
 '''
 
 
