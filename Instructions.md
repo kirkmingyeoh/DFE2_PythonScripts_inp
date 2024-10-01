@@ -9,16 +9,24 @@ Two Abaqus input files need to be provided by the user - one each to describe th
 
 1) Macroscale input file - This input file should contain all the information detailing the macroscale problem to be analysed. The macroscale Part and Instance should be meshed and assigned an Elastic material with arbitrary property values. The script will replace the arbitrary material with null material properties. The boundary conditions should also be imposed on the macroscale Instance, and all other analysis settings such as time increment should be included. 
 
-2) Microscale input file - This input file should contain all the information detailing the microscale RVE of the macroscale structure. The RVE should be rectangular (2D) or cuboidal (3D) and aligned along the global x, y and z axes. The RVE should also be periodic with the appropriate materials assigned to the corresponding regions. An Instance should be included in the Assembly such that the Part information will be captured when the input file is generated. 
+2) Microscale input file - This input file should contain all the information detailing the microscale RVE of the macroscale structure. The RVE should be rectangular (2D) or cuboidal (3D) and aligned along the global x, y and z axes. The RVE should also be periodic with the appropriate materials assigned to the corresponding regions. An Instance should be included in the Assembly such that the Part information will be captured when the input file is generated. No other analysis information is required.
+
+Note that additional instructions or preparations might be needed for advanced or customised scripts, and should be detailed within the respective scripts. 
 
 ----
 User-provided information to the Python script
 -----
-1) 
+Once the user-provided Abaqus input files are generated, the following information needs to be updated in the Python scripts:
+1) The working directory or folder where the user-provided input files are contained
+2) Name of the macroscale input file
+3) Name of the microscale input file
+4) Intended name for the Direct FE2 input file that the script will generate
 
-2)
+Note that additional information may be required for advanced or customised scripts, and should be detailed within the respective scripts.
+
+Once the user-provided information has been updated, the user needs to run the Python script. Note that the script is written in Python 2.7, which can either be run with Abaqus' in-built Python compiler (either through CAE or CAE nogui) or with a compatible Python IDE. 
 
 -----
 Abaqus input file returned by the Python script
 -----
-The Python script will return 
+The Python script will return a correspondingly named Direct FE2 input file to the same working directory. Microscale RVEs have been placed at the Gauss points of the macroscale mesh and multi-point constraints to link the degrees of freedom of both scales have been included. This input file can then be directly submitted as a job to Abaqus. 
