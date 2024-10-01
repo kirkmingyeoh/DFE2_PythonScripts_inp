@@ -15,6 +15,9 @@ MacroInpName = 'Demo_2D_Macro.inp' # Name of macroscale input file
 RVEInpName = 'Demo_2D_Micro.inp' # Name of RVE input file Demo_2D_RVE
 NewInpName = 'DFE2_2D.inp' # Name of new Direct FE2 input file
 
+'''
+No further user input is required
+'''
 
 GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]]
 
