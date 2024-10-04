@@ -16,9 +16,9 @@ This repository contains the following files:
 Python scripts
 -----
 
-1) **DFE2_Quad_Quad_2D.py** - This script sets up a Direct FE2 input file for problems involving 2D quadrilateral elements (CPS4 or CPS4R) at both scales. A 2x2 integration scheme is used at the macroscale.
+1) **DFE2_Quad_QuadTri_2D.py** - This script sets up a Direct FE2 input file for problems involving 2D quadrilateral elements (CPS4 or CPS4R) with a 2x2 integration scheme at the macroscale, and any 2D continuum elements at the microscale. 
 
-2) **DFE2_Quad_Quad_3D.py** - This script sets up a Direct FE2 input file for problems involving 3D quadrilateral elements (CPS4 or CPS4R) at both scales. A 2x2x2 integration scheme is used at the macroscale.
+2) **DFE2_Hex_HexTetWedge_3D.py** - This script sets up a Direct FE2 input file for problems involving 3D hexahedral elements (C3D8 or C3D8R) with a 2x2x2 integration scheme at the macroscale, and any 3D continuum elements at the microscale.
 
 -----
 References
