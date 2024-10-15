@@ -40,10 +40,10 @@ def Search(inp,key1,out1,type1): #if dealine with nodes and coordinates, set typ
         out1.append(temp_line)   
 
 # Removes corner nodes from an edge
-def TakeVertexOut(face):
-    face.pop(0)
-    face.pop(-1)
-    return face  
+def TakeVertexOut(edge):
+    del edge[0]
+    del edge[-1]
+    return edge
 
 # Calculates bilinear shape function values
 def Bilin_Interpolation(tsi,eta):
