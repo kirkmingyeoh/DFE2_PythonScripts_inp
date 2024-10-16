@@ -876,6 +876,7 @@ Replaced 'remove' function with 'del' function in lines 147 and 182
 End of Revision
 
 Proposed Revisions (yet to be implemented)
+Generalise RVE Sections portion to account for possible material orientations
 Account for RVE sets and surfaces from the microscale input file, found from Part?
 Account for RVE level interactions, found from Instance
 Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line
