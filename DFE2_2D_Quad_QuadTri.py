@@ -593,6 +593,7 @@ When reading RVE material definitions, current code will miss the last line of t
 End of 240916 Revision
 
 Proposed Revisions (yet to be implemented)
+Generalise RVE Sections portion to account for possible material orientations
 Account for RVE sets and surfaces from the microscale input file, found from Part?
 Account for RVE level interactions, found from Instance
 Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line
