@@ -12,6 +12,8 @@ This repository contains the following files:
 
 (2) Instructions.md - Instructions on how to prepare the user-provided input files as well as the Python script for setting up a Direct FE2 input file. 
 
+(3) Demo.zip - Zip folders containing simple examples for the Python scripts. Each zip folder contains the user-provided macroscale and microscale input files, as well as the resulting Direct FE2 input files returned by the Python script. 'Demo_2D_Quad_Quad.zip' runs with 'DFE2_2D_Quad_QuadTri.py', while 'Demo_3D_Hex_Hex.zip' runs with 'DFE2_3D_Hex_HexTetWedge.py'. 
+
 -----
 Python scripts
 -----
