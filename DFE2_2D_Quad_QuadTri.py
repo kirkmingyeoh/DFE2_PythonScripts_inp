@@ -595,8 +595,8 @@ End of 240916 Revision
 Proposed Revisions (yet to be implemented)
 Generalise RVE Sections portion to account for possible material orientations
 Account for RVE sets and surfaces from the microscale input file, found from Part?
-Account for RVE level interactions, found from Instance
-Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line
+Account for RVE level interactions and constraints, found from Instance, including the rearrangement? adopt from code for Yuhao and ZB
+Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line? adopt from code for Yuhao and ZB
 Allow for (partial) reduced integration by changing the list of GP? adopt from code for ZB
 Account for multiple macroscale parts, multiple types of RVE and different RVE orientations? adopt from code for Yuhao
 '''     
