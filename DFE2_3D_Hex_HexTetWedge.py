@@ -42,7 +42,7 @@ def Search(inp,key1,out1,type1): #if dealine with nodes and coordinates, set typ
 # Removes corner nodes from an edge        
 def TakeVertexOut(edge):
     del edge[0]
-    del edge[1]
+    del edge[-1]
     return edge   
 
 # Calculates trilinear shape function values
