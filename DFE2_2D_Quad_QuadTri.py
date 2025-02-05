@@ -599,6 +599,7 @@ Account for RVE level interactions and constraints, found from Instance, includi
 Account for BCs applied at Initial step when writing RVE materials, which appears before the ------- line? adopt from code for Yuhao and ZB
 Allow for (partial) reduced integration by changing the list of GP? adopt from code for ZB
 Account for multiple macroscale parts, multiple types of RVE and different RVE orientations? adopt from code for Yuhao
+Relabel J as J^T for better clarity
 '''     
         
             
