@@ -600,6 +600,7 @@ Account for BCs applied at Initial step when writing RVE materials, which appear
 Allow for (partial) reduced integration by changing the list of GP? adopt from code for ZB
 Account for multiple macroscale parts, multiple types of RVE and different RVE orientations? adopt from code for Yuhao
 Relabel J as J^T for better clarity
+Account for X1=0 cases when sorting for the macroscale element connectivity
 '''     
         
             
