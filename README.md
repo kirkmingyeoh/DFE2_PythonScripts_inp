@@ -6,8 +6,6 @@ Moreover, Direct FE2 is also much simpler to implement and use, as it does not r
 
 In this repository, Python scripts to help users set up a Direct FE2 analysis input file for use in Abaqus are shared. The script takes as input two Abaqus input files, one each for the macroscale and the microscale representative volume element (RVE), and then returns a separate Direct FE2 input file that incorporates the RVE into the macroscale analysis. Detailed descriptions of the input files as well as instructions to run the scripts are presented in (2) Instructions.md below. The user can then immediately submit the Direct FE2 input file as a job in Abaqus. Two examples, one each for 2D quadrilateral and 3D hexahedral elements, are also presented.
 
-This repository is preserved to be the same as described in the manuscript 'A Python script repository for multiscale modelling with Direct FE2 in Abaqus' (DOI: xxx) for the reader's reference. As such, it will not be updated further. The live repository which will be continuously updated as improvements are made or when new user-friendly scripts for various Direct FE2 models are developed can be found at: https://github.com/kirkmingyeoh/DFE2_PythonScripts_inp_live.
-
 This repository contains the following files:
 
 (1) Python scripts - These are the Python scripts used to set up Direct FE2 input files, which are further detailed below.
@@ -15,6 +13,8 @@ This repository contains the following files:
 (2) Instructions.md - Instructions on how to prepare the user-provided input files as well as the Python script for setting up a Direct FE2 input file. 
 
 (3) Demo.zip - Zip folders containing simple examples for the Python scripts. Each zip folder contains the user-provided macroscale and microscale input files, as well as the resulting Direct FE2 input files returned by the Python script. 'Demo_2D_Quad_Quad.zip' runs with 'DFE2_2D_Quad_QuadTri.py', while 'Demo_3D_Hex_Hex.zip' runs with 'DFE2_3D_Hex_HexTetWedge.py'. 
+
+Kindly note that this repository is preserved to be the same as described in the manuscript 'A Python script repository for multiscale modelling with Direct FE2 in Abaqus' (DOI: xxx) for the reader's reference. As such, it will not be updated further. The live repository which will be continuously updated as improvements are made or when new user-friendly scripts for various Direct FE2 models are developed can be found at: https://github.com/kirkmingyeoh/DFE2_PythonScripts_inp_live.
 
 -----
 Python scripts
