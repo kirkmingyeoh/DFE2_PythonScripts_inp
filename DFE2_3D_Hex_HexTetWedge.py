@@ -22,167 +22,168 @@ No further user input is required
 GP = [[-3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,3**-0.5,3**-0.5],[-3**-0.5,3**-0.5,3**-0.5]]
 
 ### Define functions
-# Search inp array for a particular part's elements and nodes
-def Search(inp,key1,out1,type1): #if dealine with nodes and coordinates, set type1 to 1 
-    for i in range(len(inp)):
-        if inp[i].count(key1)!=0:
+# Search inp list for a particular part's elements and nodes
+def Search(inp,key1,out1,type1): # If dealing with nodes and coordinates, set type1 to 1 
+    for n_inp_lines in range(len(inp)): # Read the input file line by line
+        if inp[n_inp_lines].count(key1)!=0: # Stop at keyword key1
             break    
-    for temp_line in inp[i+1:]:
-        if (temp_line == '') or (temp_line.count("*") != 0):
+    for temp_line in inp[n_inp_lines+1:]: # Read from the line after the one containing keyword key1
+        if (temp_line == '') or (temp_line.count("*") != 0): # Stop when the list of nodes or elements ends
             break
-        temp_line = (temp_line.replace(',',' ')).split()
-        temp_line.pop(0) #Removes element number in connectivity and node number in nodal coordinates
-        for i in range(len(temp_line)):
+        temp_line = (temp_line.replace(',',' ')).split() # Split the line of nodal coordinates or element nodal connectivities into a list
+        temp_line.pop(0) # Removes node number in nodal coordinates or element number in connectivity
+        for n_list_terms in range(len(temp_line)):
             if type1 == 1:
-                temp_line[i] = float(temp_line[i])
+                temp_line[n_list_terms] = float(temp_line[n_list_terms])
             else:
-                temp_line[i] = int(temp_line[i])-1 #All node/element labels are -1 for use in Python as indices
-        out1.append(temp_line)   
+                temp_line[n_list_terms] = int(temp_line[n_list_terms])-1 # All node labels in connectivity list are -1 for use in Python as indices
+        out1.append(temp_line) # Returns list of nodal cordinates or element nodal connectivity   
 
-# Removes corner nodes from an edge        
+# Removes corner nodes from an edge based on the smallest and largest coordinate       
 def TakeVertexOut(edge):
     del edge[0]
     del edge[-1]
-    return edge   
+    return edge # Returns a list of nodes on the edges without the corner node of the RVE
 
 # Calculates trilinear shape function values
-def Trilin_Interpolation(tsi,eta,zeta):
-    N1=float(0.125*(1-tsi)*(1-eta)*(1-zeta))
-    N2=float(0.125*(1+tsi)*(1-eta)*(1-zeta))
-    N3=float(0.125*(1+tsi)*(1+eta)*(1-zeta))
-    N4=float(0.125*(1-tsi)*(1+eta)*(1-zeta))
-    N5=float(0.125*(1-tsi)*(1-eta)*(1+zeta))
-    N6=float(0.125*(1+tsi)*(1-eta)*(1+zeta))
-    N7=float(0.125*(1+tsi)*(1+eta)*(1+zeta))
-    N8=float(0.125*(1-tsi)*(1+eta)*(1+zeta))   
-    return [N1,N2,N3,N4,N5,N6,N7,N8]
+def Trilin_Interpolation(tsi,eta,zeta): # tsi, eta and zeta are the natural coordinates
+    N1 = float(0.125*(1-tsi)*(1-eta)*(1-zeta))
+    N2 = float(0.125*(1+tsi)*(1-eta)*(1-zeta))
+    N3 = float(0.125*(1+tsi)*(1+eta)*(1-zeta))
+    N4 = float(0.125*(1-tsi)*(1+eta)*(1-zeta))
+    N5 = float(0.125*(1-tsi)*(1-eta)*(1+zeta))
+    N6 = float(0.125*(1+tsi)*(1-eta)*(1+zeta))
+    N7 = float(0.125*(1+tsi)*(1+eta)*(1+zeta))
+    N8 = float(0.125*(1-tsi)*(1+eta)*(1+zeta))   
+    return [N1,N2,N3,N4,N5,N6,N7,N8] # Returns a list of shape function values
 
 # Sorts nodes along an edge using their coordinates
 def SortListofNodes1D(faceN,coordinate): # 0 for x; 1 for y; 2 for z; gives node numbers ready to be called with python (already -1)
     newlist = []
     oldlist = []
-    for i in range(len(faceN)):
-        oldlist.append(RVENodalCoord[faceN[i]][coordinate])
+    for n_face_nodes in range(len(faceN)): # Obtain a list of coordinates for all the nodes
+        oldlist.append(RVENodalCoord[faceN[n_face_nodes]][coordinate])
     
-    orderedlist = sorted(oldlist)
-    for j in range(len(orderedlist)):
-        ind = oldlist.index(orderedlist[j])
+    orderedlist = sorted(oldlist) # Sort the nodal coordinates
+    for n_oldlist_nodes in range(len(orderedlist)): # Sort the nodes based on the sorted list of coodinates
+        ind = oldlist.index(orderedlist[n_oldlist_nodes])
         newlist.append(faceN[ind])
     
-    return newlist
+    return newlist # Returns a list of sorted nodes
 
-# Sorts nodes along a face using their coordinates
+# Sorts nodes on a face using their coordinates
 def SortListofNodes2D(faceN,coord1,coord2): # 0 for x; 1 for y; 2 for z; gives node numbers ready to be called with python (already -1)
-    oldlistC1 = [] #first coordinate to be sorted along
+    oldlistC1 = [] 
     newlistN = []
     
-    #Sort by first coodinate
-    for i in range(len(faceN)):
-        oldlistC1.append(RVENodalCoord[faceN[i]][coord1])
+    # Sort by first coordinate
+    for n_face_nodes in range(len(faceN)): # Obtain a list of coordinates along the first direction for all the nodes
+        oldlistC1.append(RVENodalCoord[faceN[n_face_nodes]][coord1])
         
-    newlistC1 = sorted(list(dict.fromkeys(oldlistC1)))
-        
-    for i in range(len(newlistC1)):
-        C1 = newlistC1[i]
+    newlistC1 = sorted(list(dict.fromkeys(oldlistC1))) # Sort the nodal coordinates along the first direction, removing repeats
+
+    # Sort by second coordinate for each new unique first coordinate
+    for n_newlistC1_coords in range(len(newlistC1)): 
+        C1 = newlistC1[n_newlistC1_coords]
         sublistN = []
         sublistC2 = []
-        for j in range(len(faceN)):
-            C1N = RVENodalCoord[faceN[j]][coord1]
+        for n2_face_nodes in range(len(faceN)): # Obtain the node labels and second coordinates for nodes with the first coordinate equal to C1 
+            C1N = RVENodalCoord[faceN[n2_face_nodes]][coord1]
             
             if (C1N==C1):
-                sublistN.append(faceN[j])
-                sublistC2.append(RVENodalCoord[faceN[j]][coord2])
+                sublistN.append(faceN[n2_face_nodes])
+                sublistC2.append(RVENodalCoord[faceN[n2_face_nodes]][coord2])
                 
-        newlistC2 = sorted(sublistC2)
-        for j in range(len(sublistN)):
-            Nindex = sublistC2.index(newlistC2[j])
+        newlistC2 = sorted(sublistC2) # Sort the list of second coordinates
+        for n_newlistC1_nodes in range(len(sublistN)):
+            Nindex = sublistC2.index(newlistC2[n_newlistC1_nodes])
             newlistN.append(sublistN[Nindex]) 
     
-    return newlistN
+    return newlistN # Returns a list of sorted nodes
 
-# Removes nodes from a set that matches the given coordinates
+# Removes nodes from a set that matches a given set of coordinates
 def ExcludeNodes(faceN,coord1,coord2,coord3): # coord1, coord2 and coord3 are the coordinates to exclude, to be given as lists
     newlistN = []
     
-    for i in range(len(faceN)):
-        if RVENodalCoord[faceN[i]][0] not in coord1:
-            if RVENodalCoord[faceN[i]][1] not in coord2:
-                if RVENodalCoord[faceN[i]][2] not in coord3:
-                    newlistN.append(faceN[i])
+    for n_face_nodes in range(len(faceN)):
+        if RVENodalCoord[faceN[n_face_nodes]][0] not in coord1: # If the node does not have an x coordinate matching any in the list
+            if RVENodalCoord[faceN[n_face_nodes]][1] not in coord2: # If the node does not have a y coordinate matching any in the list
+                if RVENodalCoord[faceN[n_face_nodes]][2] not in coord3: # If the node does not have a z coordinate matching any in the list
+                    newlistN.append(faceN[n_face_nodes])
     
-    return newlistN        
+    return newlistN # Returns a list of nodes that do not have coordinates matching the given set        
 
 
 ### Extracting information from Macro and RVE input files
 # Macroscale input file
 inp1 = []    
-f1 = open(MacroInpName,'r')
+f1 = open(MacroInpName,'r') # Open the macroscale input file as f1
 
-while 1:
+while 1: # Read the macroscale input file line by line and store it
     line = f1.readline()
     if not line:
         break
-    line = line.strip() #removes additional white spaces on left and right
+    line = line.strip() # Removes additional white spaces on left and right
     inp1.append(line)
     
-f1.close()
+f1.close() 
 
 # Removing 'generate' for easier processing
-for i in reversed(range(len(inp1))):
-    if (inp1[i].count('generate')!=0):
-        Temp = (inp1[i+1].replace(',',' ')).split()
-        k = 0 #term counter
-        m = 0 #extra line counter
-        for j in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
-            if k==0:
-                Temp2 = str(j)
-                k = k+1
-            elif k==16:
-                inp1.insert(i+2+m,Temp2)
-                m = m+1
-                Temp2 = str(j)
-                k = 1
-            else:
-                Temp2 = Temp2+', '+str(j)
-                k = k+1
-        inp1.insert(i+2+m,Temp2)
-        inp1[i] = inp1[i][0:len(inp1[i])-10]
-        del inp1[i+1]
+for n_inp1_lines in reversed(range(len(inp1))): # Read through the macroscale input file lines, done in reverse to avoid issues with line number when expanding the 'generate' keyword
+    if (inp1[n_inp1_lines].count('generate')!=0): # Lines that compact node or element lists and contain the 'generate' keyword
+        Temp = (inp1[n_inp1_lines+1].replace(',',' ')).split() # Split the key numbers in the compacted list containing the start, end and increment for the list
+        n_terms = 0 # Term counter
+        n_lines = 0 # Extra line counter
+        for n_fulllist_terms in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
+            if n_terms==0: # Start of the list
+                Temp2 = str(n_fulllist_terms)
+                n_terms = n_terms+1
+            elif n_terms==16: # 16th term of the list, where a new line is required
+                inp1.insert(n_inp1_lines+2+n_lines,Temp2) # Insert the current filled line into the macroscale input file lines
+                n_lines = n_lines+1
+                Temp2 = str(n_fulllist_terms) # Start a new line with the next term
+                n_terms = 1
+            else: # All other terms
+                Temp2 = Temp2+', '+str(n_fulllist_terms)
+                n_terms = n_terms+1
+        inp1.insert(n_inp1_lines+2+m,Temp2) # Insert the final line into the macroscale input file lines
+        inp1[n_inp1_lines] = inp1[n_inp1_lines][0:len(inp1[n_inp1_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
+        del inp1[n_inp1_lines+1] # Remove the original compacted list
 
 # RVE input file
 inp2 = []    
-f2 = open(RVEInpName,'r')
+f2 = open(RVEInpName,'r') # Open the RVE input file as f2
 
-while 1:
+while 1: # Read the RVE input file line by line and store it
     line = f2.readline()
     if not line:
         break
-    line = line.strip() #removes additional white spaces on left and right
+    line = line.strip()  Removes additional white spaces on left and right
     inp2.append(line)
     
 f2.close()
 
 # Removing 'generate' for easier processing
-for i in reversed(range(len(inp2))):
-    if (inp2[i].count('generate')!=0):
-        Temp = (inp2[i+1].replace(',',' ')).split()
-        k = 0 #term counter
-        m = 0 #extra line counter
-        for j in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
-            if k==0:
-                Temp2 = str(j)
-                k = k+1
-            elif k==16:
-                inp2.insert(i+2+m,Temp2)
-                m = m+1
-                Temp2 = str(j)
-                k = 1
-            else:
-                Temp2 = Temp2+', '+str(j)
-                k = k+1
-        inp2.insert(i+2+m,Temp2)
-        inp2[i] = inp2[i][0:len(inp2[i])-10]
-        del inp2[i+1]
+for n_inp2_lines in reversed(range(len(inp2))): # Read through the RVE input file lines, done in reverse to avoid issues with line number when expanding the 'generate' keyword
+    if (inp2[n_inp2_lines].count('generate')!=0): # Lines that compact node or element lists and contain the 'generate' keyword
+        Temp = (inp2[n_inp2_lines+1].replace(',',' ')).split() # Split the key numbers in the compacted list containing the start, end and increment for the list
+        n_terms = 0 # Term counter
+        n_lines = 0 # Extra line counter
+        for n_fulllist_terms in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
+            if n_terms==0: # Start of the list
+                Temp2 = str(n_fulllist_terms)
+                n_terms = n_terms+1
+            elif n_terms==16: # 16th term of the list, where a new line is required
+                inp2.insert(n_inp2_lines+2+n_lines,Temp2) # Insert the current filled line into the RVE input file lines
+                n_lines = n_lines+1
+                Temp2 = str(n_fulllist_terms) # Start a new line with the next term
+                n_terms = 1
+            else: # All other terms
+                Temp2 = Temp2+', '+str(n_fulllist_terms)
+                n_terms = n_terms+1
+        inp2.insert(n_inp2_lines+2+m,Temp2) # Insert the final line into the RVE input file lines
+        inp2[n_inp2_lines] = inp2[n_inp2_lines][0:len(inp2[n_inp2_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
+        del inp2[n_inp2_lines+1] # Remove the original compacted list
 
 # Extracting macroscale element info from old inp file
 MacroNodalConnect,MacroNodalCoord = [],[]
