@@ -89,55 +89,55 @@ for n_inp1_lines in reversed(range(len(inp1))): # Read through the macroscale in
         n_terms = 0 # Term counter
         n_lines = 0 # Extra line counter
         for n_fulllist_terms in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
-            if n_terms==0:
+            if n_terms==0: # Start of the list
                 Temp2 = str(n_fulllist_terms)
                 n_terms = n_terms+1
-            elif n_terms==16:
-                inp1.insert(n_inp1_lines+2+n_lines,Temp2)
+            elif n_terms==16: # 16th term of the list, where a new line is required
+                inp1.insert(n_inp1_lines+2+n_lines,Temp2) # Insert the current filled line into the input file lines
                 n_lines = n_lines+1
-                Temp2 = str(n_fulllist_terms)
+                Temp2 = str(n_fulllist_terms) # Start a new line with the next term
                 n_terms = 1
-            else:
+            else: # All other terms
                 Temp2 = Temp2+', '+str(n_fulllist_terms)
                 n_terms = n_terms+1
-        inp1.insert(n_inp1_lines+2+m,Temp2)
-        inp1[n_inp1_lines] = inp1[n_inp1_lines][0:len(inp1[n_inp1_lines])-10]
-        del inp1[n_inp1_lines+1]
+        inp1.insert(n_inp1_lines+2+m,Temp2) # Insert the final line into the input file lines
+        inp1[n_inp1_lines] = inp1[n_inp1_lines][0:len(inp1[n_inp1_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
+        del inp1[n_inp1_lines+1] # Remove the original compacted list
 
 # RVE input file
 inp2 = []    
-f2 = open(RVEInpName,'r')
+f2 = open(RVEInpName,'r') # Open the RVE input file as f2
 
-while 1:
+while 1: # Read the RVE input file line by line and store it
     line = f2.readline()
     if not line:
         break
-    line = line.strip() #removes additional white spaces on left and right
+    line = line.strip()  Removes additional white spaces on left and right
     inp2.append(line)
     
 f2.close()
 
 # Removing 'generate' for easier processing
-for i in reversed(range(len(inp2))):
-    if (inp2[i].count('generate')!=0):
-        Temp = (inp2[i+1].replace(',',' ')).split()
-        k = 0 #term counter
-        m = 0 #extra line counter
-        for j in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
-            if k==0:
-                Temp2 = str(j)
-                k = k+1
-            elif k==16:
-                inp2.insert(i+2+m,Temp2)
-                m = m+1
-                Temp2 = str(j)
-                k = 1
-            else:
-                Temp2 = Temp2+', '+str(j)
-                k = k+1
-        inp2.insert(i+2+m,Temp2)
-        inp2[i] = inp2[i][0:len(inp2[i])-10]
-        del inp2[i+1]
+for n_inp2_lines in reversed(range(len(inp2))): # Read through the RVE input file lines, done in reverse to avoid issues with line number when expanding the 'generate' keyword
+    if (inp2[n_inp2_lines].count('generate')!=0): # Lines that compact node or element lists and contain the 'generate' keyword
+        Temp = (inp2[n_inp2_lines+1].replace(',',' ')).split() # Split the key numbers in the compacted list containing the start, end and increment for the list
+        n_terms = 0 # Term counter
+        n_lines = 0 # Extra line counter
+        for n_fulllist_terms in range(int(Temp[0]),int(Temp[1])+1,int(Temp[2])):
+            if n_terms==0: # Start of the list
+                Temp2 = str(n_fulllist_terms)
+                n_terms = n_terms+1
+            elif n_terms==16: # 16th term of the list, where a new line is required
+                inp2.insert(n_inp2_lines+2+n_lines,Temp2) # Insert the current filled line into the RVE input file lines
+                n_lines = n_lines+1
+                Temp2 = str(n_fulllist_terms) # Start a new line with the next term
+                n_terms = 1
+            else: # All other terms
+                Temp2 = Temp2+', '+str(n_fulllist_terms)
+                n_terms = n_terms+1
+        inp2.insert(n_inp2_lines+2+m,Temp2) # Insert the final line into the RVE input file lines
+        inp2[n_inp2_lines] = inp2[n_inp2_lines][0:len(inp2[n_inp2_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
+        del inp2[n_inp2_lines+1] # Remove the original compacted list
 
 # Extracting macroscale element info from old inp file
 MacroNodalConnect,MacroNodalCoord = [],[]
