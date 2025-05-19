@@ -592,6 +592,12 @@ When reading RVE material definitions, current code will miss the last line of t
 
 End of 240916 Revision
 
+250519 Revision (WIP)
+Replaced variables with explanatory names
+Added additional comments for clarity
+
+End of 250519 Revision
+
 Proposed Revisions (yet to be implemented)
 Generalise RVE Sections portion to account for possible material orientations
 Account for RVE sets and surfaces from the microscale input file, found from Part?
