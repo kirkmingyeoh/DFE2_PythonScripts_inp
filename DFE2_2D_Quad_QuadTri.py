@@ -54,7 +54,7 @@ def Bilin_Interpolation(tsi,eta): # tsi and eta are the natural coordinates
     return [N1,N2,N3,N4] # Returns a list of shape function values
 
 # Sorts nodes along an edge using their coordinates
-def SortListofNodes1D(faceN,coordinate): # 0 for x; 1 for y; 2 for z; gives node numbers ready to be called with python (already -1)
+def SortListofNodes1D(faceN,coordinate): # Coordinates: 0 for x; 1 for y; 2 for z
     newlist = []
     oldlist = []
     for n_face_nodes in range(len(faceN)): # Obtain a list of coordinates for all the nodes
@@ -65,7 +65,7 @@ def SortListofNodes1D(faceN,coordinate): # 0 for x; 1 for y; 2 for z; gives node
         ind = oldlist.index(orderedlist[n_oldlist_nodes])
         newlist.append(faceN[ind])
     
-    return newlist # Returns a list of sorted nodes
+    return newlist # Returns a list of sorted nodes in terms of node numbers ready to be called with python (already -1)
 
 
 ### Extracting information from Macro and RVE input files
@@ -100,7 +100,7 @@ for n_inp1_lines in reversed(range(len(inp1))): # Read through the macroscale in
             else: # All other terms
                 Temp2 = Temp2+', '+str(n_fulllist_terms)
                 n_terms = n_terms+1
-        inp1.insert(n_inp1_lines+2+m,Temp2) # Insert the final line into the input file lines
+        inp1.insert(n_inp1_lines+2+n_lines,Temp2) # Insert the final line into the input file lines
         inp1[n_inp1_lines] = inp1[n_inp1_lines][0:len(inp1[n_inp1_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
         del inp1[n_inp1_lines+1] # Remove the original compacted list
 
@@ -112,7 +112,7 @@ while 1: # Read the RVE input file line by line and store it
     line = f2.readline()
     if not line:
         break
-    line = line.strip()  Removes additional white spaces on left and right
+    line = line.strip() # Removes additional white spaces on left and right
     inp2.append(line)
     
 f2.close()
@@ -135,44 +135,44 @@ for n_inp2_lines in reversed(range(len(inp2))): # Read through the RVE input fil
             else: # All other terms
                 Temp2 = Temp2+', '+str(n_fulllist_terms)
                 n_terms = n_terms+1
-        inp2.insert(n_inp2_lines+2+m,Temp2) # Insert the final line into the RVE input file lines
+        inp2.insert(n_inp2_lines+2+n_lines,Temp2) # Insert the final line into the RVE input file lines
         inp2[n_inp2_lines] = inp2[n_inp2_lines][0:len(inp2[n_inp2_lines])-10] # Remove the 'generate' keyword from the opening line of the set or surface list
         del inp2[n_inp2_lines+1] # Remove the original compacted list
 
 # Extracting macroscale element info from old inp file
 MacroNodalConnect,MacroNodalCoord = [],[]
-Search(inp1,'*Element',MacroNodalConnect,0)
-Search(inp1,'*Node',MacroNodalCoord,1)
+Search(inp1,'*Element',MacroNodalConnect,0) # Search for macroscale elements' nodal connectivity and store it
+Search(inp1,'*Node',MacroNodalCoord,1) # Search for macroscale nodal coordinates and store it
 
-StartConst = 'a'
-for i in range(len(inp1)):
-    if (inp1[i].count('*Instance,'))!=0:
-        Line = inp1[i].split(', ')
-        MacroInstName = Line[1][5:]
-    if (inp1[i].count('*Material,'))!=0:
-        inp1[i+2] = '1e-10,1e-10'
-    if (inp1[i].count('** Section'))!=0:
-        if inp1[i+2] == ',':
-            Thickness = 1.0
+StartConst = 'a' # Marker to indicate start of Constraints, if any
+for n_inp1_lines in range(len(inp1)): # Search through all lines in the macroscale input file
+    if (inp1[n_inp1_lines].count('*Instance,'))!=0: # Find the line containing the macroscale Instance, using the keyword '*Instance,'
+        Line = inp1[n_inp1_lines].split(', ') 
+        MacroInstName = Line[1][5:] # Extract the macroscale Instance name
+    if (inp1[n_inp1_lines].count('*Material,'))!=0: # Find the line containing the macroscale Material definition, using the keyword '*Material,'
+        inp1[n_inp1_lines+2] = '1e-10,1e-10' # Replace the macroscale Material with null definitions
+    if (inp1[n_inp1_lines].count('** Section'))!=0: # Find the line containing the macroscale Section thickness, using the keyword '** Section'
+        if inp1[n_inp1_lines+2] == ',': 
+            Thickness = 1.0 # Set the thickness to 1.0 if it is not defined
         else:
-            Thickness = float(inp1[i+2].strip(','))
-    if (inp1[i].count('** Constraint'))!=0 and (StartConst == 'a'):
-        StartConst = i
+            Thickness = float(inp1[n_inp1_lines+2].strip(',')) # Extract the thickness value if it is defined
+    if (inp1[n_inp1_lines].count('** Constraint'))!=0 and (StartConst == 'a'): # Find the line defining the start of macroscale Constraints if it has not been found, using the keyword '** Constraint'
+        StartConst = n_inp1_lines # Mark the starting line for the macroscale Constraints
 
 # Extracting RVE info from old inp file
 RVENodalCoord = []
-Search(inp2,'*Node',RVENodalCoord,1)
+Search(inp2,'*Node',RVENodalCoord,1) # Search for RVE nodal coordinates and store it
 
-Sections = []
-Materials = []
-StartEle = 'a'
-for i in range(len(inp2)):
-    if (inp2[i].count('*Element'))!=0 and (StartEle == 'a'):
-        StartEle = i
-    if (inp2[i].count('** Section'))!=0:
-        Sections.append(i)
-    if (inp2[i].count('*Material'))!=0:
-        Materials.append(i)
+Sections = [] # List to store first line number of each RVE Sections
+Materials = [] # List to store first line number of each RVE Material
+StartEle = 'a' # Marker to indicate start of RVE Elements
+for n_inp2_lines in range(len(inp2)):
+    if (inp2[n_inp2_lines].count('*Element'))!=0 and (StartEle == 'a'): # Find the line defining the start of RVE elements if it has not been found, using the keyword '*Element'
+        StartEle = n_inp2_lines # Mark the starting line for the RVE elements
+    if (inp2[n_inp2_lines].count('** Section'))!=0:
+        Sections.append(n_inp2_lines)
+    if (inp2[n_inp2_lines].count('*Material'))!=0:
+        Materials.append(n_inp2_lines)
 
 RVEMats = open('RVEMats.dat','w')
 for i in range(len(Materials)):
