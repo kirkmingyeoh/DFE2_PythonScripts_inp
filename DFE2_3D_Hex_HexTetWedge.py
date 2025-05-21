@@ -216,7 +216,7 @@ for n_inp2_lines in range(len(inp2)): # Search through all lines in the RVE inpu
         Materials.append(n_inp2_lines) # Store the first line number for each RVE Material
 
 RVEMats = open('RVEMats.dat','w') # Open a temporary file to store information on RVE Materials
-for n_inp2_lines in range(len(Materials)): # Looping through each RVE Material
+for n_inp2_lines in range(len(Materials)): # Loop through each RVE Material
     for n2_inp2_lines in range(Materials[n_inp2_lines]+1,len(inp2)): # Search for the end of each RVE Material definition, starting from the line after the first line
         if (inp2[n2_inp2_lines].count('*Material'))!=0 or (inp2[n2_inp2_lines].count('**'))!=0: # Start of next RVE Material or other definition, marked with the keywords '*Material' or '**' respectively 
             MatEnd = n2_inp2_lines # Mark the end of the current RVE Material
@@ -229,178 +229,192 @@ RVEMats.close()
 
 ### Processing the macroscale part information
 # Sorting the nodal connectivity to match with DFE2 conventions
-N_macro_eles = len(MacroNodalConnect)
-NodalConnect = []
-NodalCoordX = []
-NodalCoordY = []
-NodalCoordZ = []
-for i in range(N_macro_eles):
-    Nodes = []
-    TempCoordX = []
-    TempCoordY = []
-    TempCoordZ = []
-    Disp = [[] for x in range(8)]
+N_macro_eles = len(MacroNodalConnect) # Total number of macroscale elements
+NodalConnect = [] # List to store sorted macroscale element nodal connectivities
+NodalCoordX = [] # List to store nodal x coordinates based on sorted macroscale element nodal connectivities
+NodalCoordY = [] # List to store nodal y coordinates based on sorted macroscale element nodal connectivities
+NodalCoordZ = [] # List to store nodal z coordinates based on sorted macroscale element nodal connectivities
+for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
+    Nodes = [] # List to store nodes labels for all nodes of the current macroscale element
+    TempCoordX = [] # List to store x coordinates for all nodes of the current macroscale element
+    TempCoordY = [] # List to store y coordinates for all nodes of the current macroscale element
+    TempCoordZ = [] # List to store z coordinates for all nodes of the current macroscale element
+    Disp = [[] for x in range(len(MacroNodalConnect[n_macro_eles]))] # List to store displacement vector of all nodes wrt the centroid of the current macroscale element
     
     # Obtaining nodal information from this particular element
-    for j in range(8):
-        Nodes.append(MacroNodalConnect[i][j])
-        TempCoordX.append(MacroNodalCoord[MacroNodalConnect[i][j]][0])
-        TempCoordY.append(MacroNodalCoord[MacroNodalConnect[i][j]][1])
-        TempCoordZ.append(MacroNodalCoord[MacroNodalConnect[i][j]][2])
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
+        Nodes.append(MacroNodalConnect[n_macro_eles][n_macroele_nodes]) # Store the node number 
+        TempCoordX.append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][0]) # Store the x coordinate
+        TempCoordY.append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][1]) # Store the y coordinate
+        TempCoordZ.append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][2]) # Store the z coordinate
     
     # Obtaining centroid of the element    
-    X0 = sum(TempCoordX)/8
-    Y0 = sum(TempCoordY)/8
-    Z0 = sum(TempCoordZ)/8
+    X0 = sum(TempCoordX)/len(MacroNodalConnect[n_macro_eles]) # x coordinate of centroid
+    Y0 = sum(TempCoordY)/len(MacroNodalConnect[n_macro_eles]) # y coordinate of centroid
+    Z0 = sum(TempCoordZ)/len(MacroNodalConnect[n_macro_eles]) # z coordinate of centroid
     
     # Obtaining displacement vector of each node relative to centroid
-    for j in range(8):
-        Disp[j].append(MacroNodalCoord[MacroNodalConnect[i][j]][0]-X0)
-        Disp[j].append(MacroNodalCoord[MacroNodalConnect[i][j]][1]-Y0)
-        Disp[j].append(MacroNodalCoord[MacroNodalConnect[i][j]][2]-Z0)
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
+        Disp[n_macroele_nodes].append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][0]-X0) # x component of displacement vector wrt centroid
+        Disp[n_macroele_nodes].append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][1]-Y0) # y component of displacement vector wrt centroid
+        Disp[n_macroele_nodes].append(MacroNodalCoord[MacroNodalConnect[n_macro_eles][n_macroele_nodes]][2]-Z0) # z component of displacement vector wrt centroid
         
-    Order = [0 for x in range(8)]
-    Set = [] # Nodes 1-4 with \zeta < 0
-    for j in range(8):
-        if Disp[j][2]<0:
-            Set.append(j)            
-    for j in range(4):
-        if Disp[Set[j]][1]<0:
-            if Disp[Set[j]][0]<0:
-                Order[0] = Set[j]
-            else:
-                Order[1] = Set[j]
-        elif Disp[Set[j]][1]>0:
-            if Disp[Set[j]][0]<0:
-                Order[3] = Set[j]
-            else:
-                Order[2] = Set[j]
-                
-    Set = [] # Nodes 5-8 with \zeta > 0
-    for j in range(8):
-        if Disp[j][2]>0:
-            Set.append(j)            
-    for j in range(4):
-        if Disp[Set[j]][1]<0:
-            if Disp[Set[j]][0]<0:
-                Order[4] = Set[j]
-            else:
-                Order[5] = Set[j]
-        elif Disp[Set[j]][1]>0:
-            if Disp[Set[j]][0]<0:
-                Order[7] = Set[j]
-            else:
-                Order[6] = Set[j]
-                
-    SortedConnect = []
-    SortedCoordX = []
-    SortedCoordY = []
-    SortedCoordZ = []
+    Order = [0 for x in range(len(MacroNodalConnect[n_macro_eles]))] # List to store the sorted nodes
+    # The 8 nodes are first split into two groups of 4, based on whether their \zeta natural coordinates are positive or negative
+    # This works on the assumption that the macroscale element is not too distorted relative to the master cubic element 
+    # After sorting based on their \zeta natural coordinate, the groups of nodes are each sorted based on their \tsi and \eta natural coordinates
+    # When sorting in plane within each group, the first node has natural coordinates [-1,-1] and the order goes in a counter-clockwise fashion
     
-    for j in range(8):
-        SortedConnect.append(Nodes[Order[j]])
-        SortedCoordX.append(MacroNodalCoord[Nodes[Order[j]]][0])
-        SortedCoordY.append(MacroNodalCoord[Nodes[Order[j]]][1])
-        SortedCoordZ.append(MacroNodalCoord[Nodes[Order[j]]][2])
+    Set = [] # List to store nodes 1-4 with \zeta < 0
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
+        if Disp[n_macroele_nodes][2]<0: # If the z component of the displacement vector is negative
+            Set.append(n_macroele_nodes) # Add the node to the set
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])/2): # Loop across the 4 chosen nodes with \zeta<0
+        # Sort the 4 nodes on the face based on their x and y components of the displacement vector
+        if Disp[Set[n_macroele_nodes]][1]<0: 
+            if Disp[Set[n_macroele_nodes]][0]<0:
+                Order[0] = Set[n_macroele_nodes] # The first node has x and y components which are both negative
+            else:
+                Order[1] = Set[n_macroele_nodes] # The second node has a positive x component and a negative y component
+        elif Disp[Set[n_macroele_nodes]][1]>0:
+            if Disp[Set[n_macroele_nodes]][0]<0:
+                Order[3] = Set[n_macroele_nodes] # The fourth node has a negative x component and a positive y component 
+            else:
+                Order[2] = Set[n_macroele_nodes] # The third node has x and y components which are both positive 
+                
+    Set = [] # List to store nodes 5-8 with \zeta > 0
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
+        if Disp[n_macroele_nodes][2]>0: # If the z component of the displacement vector is positive
+            Set.append(n_macroele_nodes) # Add the node to the set        
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])/2): # Loop across the 4 chosen nodes with \zeta<0
+        # Sort the 4 nodes on the face based on their x and y components of the displacement vector
+        if Disp[Set[n_macroele_nodes]][1]<0:
+            if Disp[Set[n_macroele_nodes]][0]<0:
+                Order[4] = Set[n_macroele_nodes] # The first node has x and y components which are both negative
+            else:
+                Order[5] = Set[n_macroele_nodes] # The second node has a positive x component and a negative y component
+        elif Disp[Set[n_macroele_nodes]][1]>0:
+            if Disp[Set[n_macroele_nodes]][0]<0:
+                Order[7] = Set[n_macroele_nodes] # The fourth node has a negative x component and a positive y component 
+            else:
+                Order[6] = Set[n_macroele_nodes] # The third node has x and y components which are both positive
+                
+    SortedConnect = [] # List to store sorted node labels for all nodes of the current macroscale element
+    SortedCoordX = [] # List to store sorted x coordinates for all nodes of the current macroscale element
+    SortedCoordY = [] # List to store sorted y coordinates for all nodes of the current macroscale element
+    SortedCoordZ = [] # List to store sorted z coordinates for all nodes of the current macroscale element
+    
+    for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
+        SortedConnect.append(Nodes[Order[n_macroele_nodes]]) # Extract the corresponding node label
+        SortedCoordX.append(MacroNodalCoord[Nodes[Order[n_macroele_nodes]]][0]) # Extract the corresponding node x coordinate
+        SortedCoordY.append(MacroNodalCoord[Nodes[Order[n_macroele_nodes]]][1]) # Extract the corresponding node y coordinate
+        SortedCoordZ.append(MacroNodalCoord[Nodes[Order[n_macroele_nodes]]][2]) # Extract the corresponding node z coordinate
         
-    NodalConnect.append(SortedConnect)
-    NodalCoordX.append(SortedCoordX)
-    NodalCoordY.append(SortedCoordY)
-    NodalCoordZ.append(SortedCoordZ)
+    NodalConnect.append(SortedConnect) # Add the sorted node for the current macroscale element to the main list
+    NodalCoordX.append(SortedCoordX) # Add the sorted x coordinates for the nodes of the current macroscale element to the main list
+    NodalCoordY.append(SortedCoordY) # Add the sorted y coordinates for the nodes of the current macroscale element to the main list
+    NodalCoordZ.append(SortedCoordZ) # Add the sorted z coordinates for the nodes of the current macroscale element to the main list
 
 
 ### Processing the RVE part information
 # Finding the smallest and largest nodal coordinate in all 3 directions
-RVE_ListX = []
-RVE_ListY = []
-RVE_ListZ = []
-for i in range(len(RVENodalCoord)):
-    RVE_ListX.append(RVENodalCoord[i][0])
-    RVE_ListY.append(RVENodalCoord[i][1])
-    RVE_ListZ.append(RVENodalCoord[i][2])
-xMin = min(RVE_ListX)
-xMax = max(RVE_ListX)
-yMin = min(RVE_ListY)
-yMax = max(RVE_ListY)
-zMin = min(RVE_ListZ)
-zMax = max(RVE_ListZ)
-del RVE_ListX
-del RVE_ListY
-del RVE_ListZ
+# Assumes a cuboidal RVE aligned along the global x, y and z directions
+RVE_ListX = [] # Temporary list to store x coordinates of all RVE nodes
+RVE_ListY = [] # Temporary list to store y coordinates of all RVE nodes
+RVE_ListZ = [] # Temporary list to store z coordinates of all RVE nodes
+for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
+    RVE_ListX.append(RVENodalCoord[n_RVE_nodes][0]) # Store the x coordinates
+    RVE_ListY.append(RVENodalCoord[n_RVE_nodes][1]) # Store the y coordinates
+    RVE_ListZ.append(RVENodalCoord[n_RVE_nodes][2]) # Store the z coordinates
+xMin = min(RVE_ListX) # Smallest x coordinate
+xMax = max(RVE_ListX) # Largest x coordinate
+yMin = min(RVE_ListY) # Smallest y coordinate
+yMax = max(RVE_ListY) # Largest y coordinate
+zMin = min(RVE_ListZ) # Smallest z coordinate
+zMax = max(RVE_ListZ) # Largest z coordinate
+del RVE_ListX # Remove the temporary list
+del RVE_ListY # Remove the temporary list
+del RVE_ListZ v
 
 # Sorting the RVE boundary nodes
-FaceLNodes,FaceRNodes,FaceBaNodes,FaceFNodes,FaceBNodes,FaceTNodes = [],[],[],[],[],[]
-EdgeLNodes, EdgeRNodes, EdgeBNodes, EdgeTNodes = [],[],[],[]
-Edge1Nodes, Edge2Nodes, Edge3Nodes, Edge4Nodes = [],[],[],[]
-for i in range(len(RVENodalCoord)):
-    if RVENodalCoord[i][0] == xMin:
-        FaceLNodes.append(i)
-    if RVENodalCoord[i][0] == xMax:
-        FaceRNodes.append(i)
-    if RVENodalCoord[i][1] == yMin:
-        FaceBaNodes.append(i)
-    if RVENodalCoord[i][1] == yMax:
-        FaceFNodes.append(i)
-    if RVENodalCoord[i][2] == zMin:
-        FaceBNodes.append(i)
-    if RVENodalCoord[i][2] == zMax:
-        FaceTNodes.append(i)
-for i in range(len(FaceBaNodes)):
-    if FaceBaNodes[i] in FaceLNodes:
-        EdgeLNodes.append(FaceBaNodes[i])
-        if FaceBaNodes[i] in FaceBNodes:
-            V1 = FaceBaNodes[i]
-        if FaceBaNodes[i] in FaceTNodes:
-            V4 = FaceBaNodes[i]
-    if FaceBaNodes[i] in FaceRNodes:
-        EdgeRNodes.append(FaceBaNodes[i])
-        if FaceBaNodes[i] in FaceBNodes:
-            V2 = FaceBaNodes[i]
-        if FaceBaNodes[i] in FaceTNodes:
-            V3 = FaceBaNodes[i]
-    if FaceBaNodes[i] in FaceBNodes:
-        EdgeBNodes.append(FaceBaNodes[i])
-    if FaceBaNodes[i] in FaceTNodes:
-        EdgeTNodes.append(FaceBaNodes[i])
-for i in range(len(FaceBNodes)):
-    if FaceBNodes[i] in FaceLNodes:
-        Edge1Nodes.append(FaceBNodes[i])
-        if FaceBNodes[i] in FaceFNodes:
-            V5 = FaceBNodes[i]
-    if FaceBNodes[i] in FaceRNodes:
-        Edge2Nodes.append(FaceBNodes[i])
-        if FaceBNodes[i] in FaceFNodes:
-            V6 = FaceBNodes[i]
-for i in range(len(FaceTNodes)):
-    if FaceTNodes[i] in FaceLNodes:
-        Edge4Nodes.append(FaceTNodes[i])
-        if FaceTNodes[i] in FaceFNodes:
-            V8 = FaceTNodes[i]
-    if FaceTNodes[i] in FaceRNodes:
-        Edge3Nodes.append(FaceTNodes[i])
-        if FaceTNodes[i] in FaceFNodes:
-            V7 = FaceTNodes[i]
+FaceLNodes,FaceRNodes,FaceBaNodes,FaceFNodes,FaceBNodes,FaceTNodes = [],[],[],[],[],[] # List to store the nodes on the RVE boundary faces
+EdgeLNodes, EdgeRNodes, EdgeBNodes, EdgeTNodes = [],[],[],[] # List to store the nodes on the RVE boundary edges attached to the back face
+Edge1Nodes, Edge2Nodes, Edge3Nodes, Edge4Nodes = [],[],[],[] # List to store the nodes on the RVE boundary edges
+for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
+    if RVENodalCoord[n_RVE_nodes][0] == xMin: # If the nodal x coordinate matches the RVE smallest x coordinate
+        FaceLNodes.append(n_RVE_nodes) # Store the node the left face list
+    if RVENodalCoord[n_RVE_nodes][0] == xMax:  # If the nodal x coordinate matches the RVE largest x coordinate
+        FaceRNodes.append(n_RVE_nodes) # Store the node the right face list
+    if RVENodalCoord[n_RVE_nodes][1] == yMin: # If the nodal y coordinate matches the RVE smallest y coordinate
+        FaceBaNodes.append(n_RVE_nodes) # Store the node the back face list
+    if RVENodalCoord[n_RVE_nodes][1] == yMax:  # If the nodal y coordinate matches the RVE largest y coordinate
+        FaceFNodes.append(n_RVE_nodes) # Store the node the front face list
+    if RVENodalCoord[n_RVE_nodes][2] == zMin: # If the nodal z coordinate matches the RVE smallest z coordinate
+        FaceBNodes.append(n_RVE_nodes) # Store the node the bottom face list
+    if RVENodalCoord[n_RVE_nodes][2] == zMax:  # If the nodal z coordinate matches the RVE largest z coordinate
+        FaceTNodes.append(n_RVE_nodes) # Store the node the top face list
+for n_FaceBa_nodes in range(len(FaceBaNodes)): # Loop through all nodes in the back face list
+    if FaceBaNodes[n_FaceBa_nodes] in FaceLNodes: # If the node is also in the left face list
+        EdgeLNodes.append(FaceBaNodes[n_FaceBa_nodes]) # Store the node in the left edge list
+        if FaceBaNodes[n_FaceBa_nodes] in FaceBNodes: # If the node is also in the bottom face list
+            V1 = FaceBaNodes[n_FaceBa_nodes] # Store the node as vertex V1
+        if FaceBaNodes[n_FaceBa_nodes] in FaceTNodes: # If the node is also in the top face list
+            V4 = FaceBaNodes[n_FaceBa_nodes] # Store the node as vertex V4
+    if FaceBaNodes[n_FaceBa_nodes] in FaceRNodes: # If the node is also in the right face list
+        EdgeRNodes.append(FaceBaNodes[n_FaceBa_nodes]) # Store the node in the right edge list
+        if FaceBaNodes[n_FaceBa_nodes] in FaceBNodes: # If the node is also in the bottom face list 
+            V2 = FaceBaNodes[n_FaceBa_nodes] # Store the node as vertex V2
+        if FaceBaNodes[n_FaceBa_nodes] in FaceTNodes: # If the node is also in the top face list
+            V3 = FaceBaNodes[n_FaceBa_nodes] # Store the node as vertex V3
+    if FaceBaNodes[n_FaceBa_nodes] in FaceBNodes: # If the node is also in the bottom face list
+        EdgeBNodes.append(FaceBaNodes[n_FaceBa_nodes]) # Store the node in the bottom edge list
+    if FaceBaNodes[n_FaceBa_nodes] in FaceTNodes: # If the node is also in the top face list
+        EdgeTNodes.append(FaceBaNodes[n_FaceBa_nodes]) # Store the node in the top edge list
+for n_FaceB_nodes in range(len(FaceBNodes)): # If the node is also in the bottom face list
+    if FaceBNodes[n_FaceB_nodes] in FaceLNodes: # If the node is also in the left face list
+        Edge1Nodes.append(FaceBNodes[n_FaceB_nodes]) # Store the node in the 1 edge list
+        if FaceBNodes[n_FaceB_nodes] in FaceFNodes: # If the node is also in the front face list
+            V5 = FaceBNodes[n_FaceB_nodes] # Store the node as vertex V5
+    if FaceBNodes[n_FaceB_nodes] in FaceRNodes: # If the node is also in the right face list
+        Edge2Nodes.append(FaceBNodes[n_FaceB_nodes]) # Store the node in the 2 edge list
+        if FaceBNodes[n_FaceB_nodes] in FaceFNodes: # If the node is also in the front face list
+            V6 = FaceBNodes[n_FaceB_nodes] # Store the node as vertex V6
+for n_FaceT_nodes in range(len(FaceTNodes)): # If the node is also in the top face list
+    if FaceTNodes[n_FaceT_nodes] in FaceLNodes: # If the node is also in the left face list
+        Edge4Nodes.append(FaceTNodes[n_FaceT_nodes]) # Store the node in the 4 edge list
+        if FaceTNodes[n_FaceT_nodes] in FaceFNodes: # If the node is also in the front face list
+            V8 = FaceTNodes[n_FaceT_nodes] # Store the node as vertex V8
+    if FaceTNodes[n_FaceT_nodes] in FaceRNodes: # If the node is also in the right face list
+        Edge3Nodes.append(FaceTNodes[n_FaceT_nodes]) # Store the node in the 3 edge list
+        if FaceTNodes[n_FaceT_nodes] in FaceFNodes: # If the node is also in the front face list
+            V7 = FaceTNodes[n_FaceT_nodes] # Store the node as vertex V7
     
 # Sorting RVE dimensions and offsets
-B_RVE = xMax - xMin
-H_RVE = yMax - yMin
-T_RVE = zMax - zMin
-OffsetX = (xMax + xMin)/2
-OffsetY = (yMax + yMin)/2
-OffsetZ = (zMax + zMin)/2
-Offset = [OffsetX,OffsetY,OffsetZ]
+B_RVE = xMax - xMin # RVE dimension along x direction
+H_RVE = yMax - yMin # RVE dimension along y direction
+T_RVE = zMax - zMin # RVE dimension along z direction
+OffsetX = (xMax + xMin)/2.0 # RVE centroid x coordinate
+OffsetY = (yMax + yMin)/2.0 # RVE centroid y coordinate
+OffsetZ = (zMax + zMin)/2.0 # RVE centroid z coordinate
+Offset = [OffsetX,OffsetY,OffsetZ] # RVE centroid coordinates
 
 # Adjusting RVE nodal coordinates to correspond to a part centered at the origin
-for i in RVENodalCoord:
-    for j in range(3):
-        i[j] = i[j] - Offset[j]
+for n_RVE_node in RVENodalCoord: # Loop through all RVE nodes
+    for n_nodal_coord in range(3): # Loop through all coordinates of each node
+        n_RVE_node[n_nodal_coord] = n_RVE_node[n_nodal_coord] - Offset[n_nodal_coord] # Subtracting the offset from all RVE nodal coordinates
 
 
 ### Generating the RVE placement in the macroscale mesh
-RVEParts = open('RVEParts.dat','w')
-Insts = open('Insts.dat','w')
-SF = []
-for i in range(N_macro_eles):
+RVEParts = open('RVEParts.dat','w') # Open a temporary file to store information on RVE Parts
+Insts = open('Insts.dat','w') # Open a temporary file to store information on RVE Instances
+SF = [] # List to store required RVE volume scaling factors
+for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
+    # Calculate the mapping function between natural and global coordinates
+    # x = a0 + a1*tsi + a2*eta + a3*zeta + a4*tsi*eta + a5*tsi*zeta + a6*eta*zeta + a7*tsi*eta*zeta
+    # y = b0 + b1*tsi + b2*eta + b3*zeta + b4*tsi*eta + b5*tsi*zeta + b6*eta*zeta + b7*tsi*eta*zeta
+    # z = d0 + d1*tsi + d2*eta + d3*zeta + d4*tsi*eta + d5*tsi*zeta + d6*eta*zeta + d7*tsi*eta*zeta
+    # C is matrix where [C]*{a0;a1;a2;a3;a4;a5;a6;a7} = {x1;x2;x3;x4;x5;x6;x7;x8}, repeated for b-y and d-z, based on the equations above
+    # 1,2,3,4,5,6,7,8 for x,y,z refer to the 8 macroscale nodes
     C = np.array([
             [1,-1,-1,-1,1,1,1,-1],
             [1,1,-1,-1,-1,-1,1,1],
@@ -409,51 +423,58 @@ for i in range(N_macro_eles):
             [1,-1,-1,1,1,-1,-1,1],
             [1,1,-1,1,-1,1,-1,-1],
             [1,1,1,1,1,1,1,1],
-            [1,-1,1,1,-1,-1,1,-1],])
-    C_inv = np.linalg.inv(C)
-    [a0,a1,a2,a3,a4,a5,a6,a7] = np.dot(C_inv,NodalCoordX[i])
-    [b0,b1,b2,b3,b4,b5,b6,b7] = np.dot(C_inv,NodalCoordY[i])
-    [d0,d1,d2,d3,d4,d5,d6,d7] = np.dot(C_inv,NodalCoordZ[i])
+            [1,-1,1,1,-1,-1,1,-1],]) # Matrix of natural coordinates
+    C_inv = np.linalg.inv(C) # Inverse of matrix C
+    [a0,a1,a2,a3,a4,a5,a6,a7] = np.dot(C_inv,NodalCoordX[n_macro_eles]) # Coefficient a
+    [b0,b1,b2,b3,b4,b5,b6,b7] = np.dot(C_inv,NodalCoordY[n_macro_eles]) # Coefficient b
+    [d0,d1,d2,d3,d4,d5,d6,d7] = np.dot(C_inv,NodalCoordZ[n_macro_eles]) # Coefficient d
     
-    for j in range(8):
-        [tsi,eta,zeta] = GP[j]
-        N1,N2,N3,N4,N5,N6,N7,N8 = Trilin_Interpolation(tsi,eta,zeta)
+    for n_macroele_GPs in range(len(GP)): # Loop through all integration points of the macroscale element
+        [tsi,eta,zeta] = GP[n_macroele_GPs] # Natural coordinates of the current integration point
+        N1,N2,N3,N4,N5,N6,N7,N8 = Trilin_Interpolation(tsi,eta,zeta) # Shape function values corresponding to the current integration point
         
-        RVE_X = N1*NodalCoordX[i][0] + N2*NodalCoordX[i][1] + N3*NodalCoordX[i][2] + N4*NodalCoordX[i][3] + N5*NodalCoordX[i][4] + N6*NodalCoordX[i][5] + N7*NodalCoordX[i][6] + N8*NodalCoordX[i][7]
-        RVE_Y = N1*NodalCoordY[i][0] + N2*NodalCoordY[i][1] + N3*NodalCoordY[i][2] + N4*NodalCoordY[i][3] + N5*NodalCoordY[i][4] + N6*NodalCoordY[i][5] + N7*NodalCoordY[i][6] + N8*NodalCoordY[i][7]
-        RVE_Z = N1*NodalCoordZ[i][0] + N2*NodalCoordZ[i][1] + N3*NodalCoordZ[i][2] + N4*NodalCoordZ[i][3] + N5*NodalCoordZ[i][4] + N6*NodalCoordZ[i][5] + N7*NodalCoordZ[i][6] + N8*NodalCoordZ[i][7]
+        RVE_X = N1*NodalCoordX[n_macro_eles][0] + N2*NodalCoordX[n_macro_eles][1] + N3*NodalCoordX[n_macro_eles][2] + N4*NodalCoordX[n_macro_eles][3] + N5*NodalCoordX[n_macro_eles][4] + N6*NodalCoordX[n_macro_eles][5] + N7*NodalCoordX[n_macro_eles][6] + N8*NodalCoordX[n_macro_eles][7] # x coordinate of the current integration point 
+        RVE_Y = N1*NodalCoordY[n_macro_eles][0] + N2*NodalCoordY[n_macro_eles][1] + N3*NodalCoordY[n_macro_eles][2] + N4*NodalCoordY[n_macro_eles][3] + N5*NodalCoordY[n_macro_eles][4] + N6*NodalCoordY[n_macro_eles][5] + N7*NodalCoordY[n_macro_eles][6] + N8*NodalCoordY[n_macro_eles][7] # y coordinate of the current integration point
+        RVE_Z = N1*NodalCoordZ[n_macro_eles][0] + N2*NodalCoordZ[n_macro_eles][1] + N3*NodalCoordZ[n_macro_eles][2] + N4*NodalCoordZ[n_macro_eles][3] + N5*NodalCoordZ[n_macro_eles][4] + N6*NodalCoordZ[n_macro_eles][5] + N7*NodalCoordZ[n_macro_eles][6] + N8*NodalCoordZ[n_macro_eles][7] # z coordinate of the current integration point
         
         J = np.array([
                 [a1+a4*eta+a5*zeta+a7*eta*zeta,b1+b4*eta+b5*zeta+b7*eta*zeta,d1+d4*eta+d5*zeta+d7*eta*zeta],
                 [a2+a4*tsi+a6*zeta+a7*tsi*zeta,b2+b4*tsi+b6*zeta+b7*tsi*zeta,d2+d4*tsi+d6*zeta+d7*tsi*zeta],
-                [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]])
+                [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]])  # Jacobian matrix of the current integration point
        
-        J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0)
+        J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
         
-        if round(J_RVE,5) in SF: # If such an RVE was created previously, reuse it for the next instance
-            N = SF.index(round(J_RVE,5))
-        else: # If not, then we create another RVE with this current thickness scaling
-            N = len(SF)
-            SF.append(round(J_RVE,5))
+        if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so == 
+            Ind_SF = SF.index(round(J_RVE,5)) # Index of the first instance of this volume scaling factor
+        else: # Create a new RVE with this current volume scaling factor if it has not been used before
+            Ind_SF = len(SF) # Index the new volume scaling factor as the next term in the list
+            SF.append(round(J_RVE,5)) # Add the new volume scaling factor to the list
+
+            # Print headers of the new Part
             print>>RVEParts,'**'
-            print>>RVEParts,'*Part, name=RVE-'+str(N+1)
+            print>>RVEParts,'*Part, name=RVE-'+str(Ind_SF+1) # Name the part with the new index
             print>>RVEParts,'*Node'
-            
-            for k in range(len(RVENodalCoord)):
-                print>>RVEParts,str(k+1)+', '+str(RVENodalCoord[k][0]*J_RVE)+', '+str(RVENodalCoord[k][1]*J_RVE)+', '+str(RVENodalCoord[k][2]*J_RVE)
-                
-            for k in range(StartEle,Sections[0]):
-                print>>RVEParts,inp2[k]
-                
-            for k in range(len(Sections)):
-                print>>RVEParts,inp2[Sections[k]]+'-'+str(N+1)
-                print>>RVEParts,inp2[Sections[k]+1]
+
+            # Print the nodal coordinates of the new Part
+            for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
+                print>>RVEParts,str(n_RVE_nodes+1)+', '+str(RVENodalCoord[n_RVE_nodes][0]*J_RVE)+', '+str(RVENodalCoord[n_RVE_nodes][1]*J_RVE)+', '+str(RVENodalCoord[n_RVE_nodes][2]*J_RVE) # RVE nodal coordinate values are scaled based on the volume scaling factor required
+
+            # Print the elements of the new Part
+            for n_inp2_lines in range(StartEle,Sections[0]):  # Loop through the RVE input file lines from the start of elements till the first Section
+                print>>RVEParts,inp2[n_inp2_lines]
+
+            # Print the Sections of the new Part
+            for n_RVE_sections in range(len(Sections)):  # Loop through the RVE Sections
+                print>>RVEParts,inp2[Sections[n_RVE_sections]]+'-'+str(Ind_SF+1) # Print the Section name, with the SF index added
+                print>>RVEParts,inp2[Sections[n_RVE_sections]+1] # Print the next line of the Section
                 print>>RVEParts,','
                 
+            # Print the end of the new Part
             print>>RVEParts,'*End Part'
-            
-        print>>Insts,'*Instance, name=Ele'+str(i+1)+'-RVE'+str(j+1)+', part=RVE-'+str(N+1)
-        print>>Insts,str(RVE_X)+', '+str(RVE_Y)+', '+str(RVE_Z)
+
+        # Print the Instance of the new Part
+        print>>Insts,'*Instance, name=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+', part=RVE-'+str(Ind_SF+1)  # Name of the Instance and the Part it refers to
+        print>>Insts,str(RVE_X)+', '+str(RVE_Y)+', '+str(RVE_Z) # Translation required for the Instance, from the origin to the macroscale integration point coordinates
         print>>Insts,'*End Instance'
         print>>Insts,'**'
 
