@@ -166,33 +166,33 @@ Search(inp2,'*Node',RVENodalCoord,1) # Search for RVE nodal coordinates and stor
 Sections = [] # List to store first line number of each RVE Sections
 Materials = [] # List to store first line number of each RVE Material
 StartEle = 'a' # Marker to indicate start of RVE Elements
-for n_inp2_lines in range(len(inp2)):
+for n_inp2_lines in range(len(inp2)): # Search through all lines in the RVE input file
     if (inp2[n_inp2_lines].count('*Element'))!=0 and (StartEle == 'a'): # Find the line defining the start of RVE elements if it has not been found, using the keyword '*Element'
         StartEle = n_inp2_lines # Mark the starting line for the RVE elements
-    if (inp2[n_inp2_lines].count('** Section'))!=0:
-        Sections.append(n_inp2_lines)
-    if (inp2[n_inp2_lines].count('*Material'))!=0:
-        Materials.append(n_inp2_lines)
+    if (inp2[n_inp2_lines].count('** Section'))!=0: # Find the lines defining the start of each RVE Section, using the keyword '** Section'
+        Sections.append(n_inp2_lines) # Store the first line number for each RVE Section
+    if (inp2[n_inp2_lines].count('*Material'))!=0: # Find the lines defining the start of each RVE Material, using the keyword '*Material'
+        Materials.append(n_inp2_lines) # Store the first line number for each RVE Material
 
-RVEMats = open('RVEMats.dat','w')
-for i in range(len(Materials)):
-    for j in range(Materials[i]+1,len(inp2)):
-        if (inp2[j].count('*Material'))!=0 or (inp2[j].count('**'))!=0:
-            MatEnd = j
+RVEMats = open('RVEMats.dat','w') # Open a temporary file to store information on RVE Materials
+for n_inp2_lines in range(len(Materials)): # Looping through each RVE Material
+    for n2_inp2_lines in range(Materials[n_inp2_lines]+1,len(inp2)): # Search for the end of each RVE Material definition, starting from the line after the first line
+        if (inp2[n2_inp2_lines].count('*Material'))!=0 or (inp2[n2_inp2_lines].count('**'))!=0: # Start of next RVE Material or other definition, marked with the keywords '*Material' or '**' respectively 
+            MatEnd = n2_inp2_lines # Mark the end of the current RVE Material
             break
-        MatEnd = j+1 # If no further information provided beyond RVE materials
-    for j in range(Materials[i],MatEnd):
-        print>>RVEMats,inp2[j]
+        MatEnd = n2_inp2_lines+1 # Current RVE Material ends with the RVE input file if no further information provided beyond RVE Materials, such as Step
+    for n2_inp2_lines in range(Materials[n_inp2_lines],MatEnd):
+        print>>RVEMats,inp2[n2_inp2_lines] # Print all RVE Materials to the temporary file
 RVEMats.close()
 
 
 ### Processing the macroscale part information
 # Sorting the nodal connectivity to match with DFE2 conventions
-Nele = len(MacroNodalConnect)
+N_macro_eles = len(MacroNodalConnect)
 NodalConnect = []
 NodalCoordX = []
 NodalCoordY = []
-for i in range(Nele):
+for i in range(N_macro_eles):
     Nodes = []
     X = []
     Y = []
@@ -288,7 +288,7 @@ for i in RVENodalCoord:
 RVEParts = open('RVEParts.dat','w')
 Insts = open('Insts.dat','w')
 SF = []
-for i in range(Nele):
+for i in range(N_macro_eles):
     C = np.array([[1,-1,-1,1],[1,1,-1,-1],[1,1,1,1],[1,-1,1,-1]])
     C_inv = np.linalg.inv(C)
     [a0,a1,a2,a3] = np.dot(C_inv,NodalCoordX[i])
@@ -362,7 +362,7 @@ for i in range(len(FaceBNodes)):
     PairingFacesBT.append(Temp)
     
 # Calculating the coefficients and setting up the MPCs
-for i in range(Nele):
+for i in range(N_macro_eles):
     C = np.array([[1,-1,-1,1],[1,1,-1,-1],[1,1,1,1],[1,-1,1,-1]])
     C_inv = np.linalg.inv(C)
     [a0,a1,a2,a3] = np.dot(C_inv,NodalCoordX[i])
