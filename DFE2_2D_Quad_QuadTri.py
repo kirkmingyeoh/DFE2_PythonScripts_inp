@@ -644,7 +644,8 @@ Account for BCs applied at Initial step when writing RVE materials, which appear
 Allow for (partial) reduced integration by changing the list of GP? adopt from code for ZB
 Account for multiple macroscale parts, multiple types of RVE and different RVE orientations? adopt from code for Yuhao
 Relabel J as J^T for better clarity
-Merge with quadratic macroscale?
+Merge with quadratic macroscale? Probably not a good idea, better to split up
+Merge the RVE and MPC loops?
 '''     
         
             
