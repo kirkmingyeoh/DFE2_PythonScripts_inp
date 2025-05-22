@@ -362,135 +362,145 @@ Insts.close()
 
             
 ### Setting up the MPCs
-Sets = open('Sets.dat','w')
-Eqns = open('Eqns.dat','w')
+Sets = open('Sets.dat','w') # Open a temporary file to store information on DFE2 Sets
+Eqns = open('Eqns.dat','w') # Open a temporary file to store information on DFE2 MPCs
 
 # Pairing the nodes
-FaceLNodes = TakeVertexOut(SortListofNodes1D(FaceLNodes,1))
-FaceRNodes = TakeVertexOut(SortListofNodes1D(FaceRNodes,1))
-PairingFacesLR = []
-for i in range(len(FaceLNodes)):
-    Temp = []
-    Temp.append(FaceLNodes[i])
-    Temp.append(FaceRNodes[i])
-    PairingFacesLR.append(Temp)
+# Assume the RVE mesh is perfectly periodic
+# Left and right faces
+FaceLNodes = TakeVertexOut(SortListofNodes1D(FaceLNodes,1)) # Sort the left face nodes based on their y coordinates and remove the two corner nodes
+FaceRNodes = TakeVertexOut(SortListofNodes1D(FaceRNodes,1)) # Sort the right face nodes based on their y coordinates and remove the two corner nodes
+PairingFacesLR = [] # List to store the paired left and right face nodes
+for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through the left face nodes
+    Temp = [] # Temporary list to store each pair of left and right face nodes
+    Temp.append(FaceLNodes[n_FaceL_nodes]) # Left face node number of the pair
+    Temp.append(FaceRNodes[n_FaceL_nodes]) # Right face node number of the pair
+    PairingFacesLR.append(Temp) # Store the pair of node numbers into the left-right list
 
-FaceBNodes = TakeVertexOut(SortListofNodes1D(FaceBNodes,0))
-FaceTNodes = TakeVertexOut(SortListofNodes1D(FaceTNodes,0))
-PairingFacesBT = []
-for i in range(len(FaceBNodes)):
-    Temp = []
-    Temp.append(FaceBNodes[i])
-    Temp.append(FaceTNodes[i])
-    PairingFacesBT.append(Temp)
+# Bottom and top faces
+FaceBNodes = TakeVertexOut(SortListofNodes1D(FaceBNodes,0)) # Sort the bottom face nodes based on their x coordinates and remove the two corner nodes
+FaceTNodes = TakeVertexOut(SortListofNodes1D(FaceTNodes,0)) # Sort the top face nodes based on their x coordinates and remove the two corner nodes
+PairingFacesBT = [] # List to store the paired bottom and top face nodes
+for n_FaceB_nodes in range(len(FaceBNodes)): # Loop through the bottom face nodes
+    Temp = [] # Temporary list to store each pair of bottom and top face nodes
+    Temp.append(FaceBNodes[n_FaceB_nodes]) # Bottom face node number of the pair
+    Temp.append(FaceTNodes[n_FaceB_nodes]) # Top face node number of the pair
+    PairingFacesBT.append(Temp) # Store the pair of node numbers into the bottom-top list
     
 # Calculating the coefficients and setting up the MPCs
-for i in range(N_macro_eles):
-    C = np.array([[1,-1,-1,1],[1,1,-1,-1],[1,1,1,1],[1,-1,1,-1]])
-    C_inv = np.linalg.inv(C)
-    [a0,a1,a2,a3] = np.dot(C_inv,NodalCoordX[i])
-    [b0,b1,b2,b3] = np.dot(C_inv,NodalCoordY[i])
+# For each macroscale element
+for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
+    # Same mapping function between natural and global coordinates
+    C = np.array([[1,-1,-1,1],[1,1,-1,-1],[1,1,1,1],[1,-1,1,-1]]) # Same matrix of natural coordinates based on the mapping function between natural and global coordinates
+    C_inv = np.linalg.inv(C) # Inverse of matrix C
+    [a0,a1,a2,a3] = np.dot(C_inv,NodalCoordX[n_macro_eles]) # Coefficient a
+    [b0,b1,b2,b3] = np.dot(C_inv,NodalCoordY[n_macro_eles]) # Coefficient b
     
-    # Calling macroscale nodes into sets
-    for j in range(4):
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-N'+str(j+1)+', instance='+str(MacroInstName)
-        print>>Sets,str(NodalConnect[i][j]+1)
-    
-    # At each macroscale GP
-    for j in range(4): # 4 GPs
-        [tsi,eta] = GP[j]
-        
-        J = np.array([[a1+a3*eta,b1+b3*eta],[a2+a3*tsi,b2+b3*tsi]])
-        J_inv = np.linalg.inv(J)
-        dN1 = [-0.25*(1-eta),-0.25*(1-tsi)]
-        dN2 = [0.25*(1-eta),-0.25*(1+tsi)]
-        dN3 = [0.25*(1+eta),0.25*(1+tsi)]
-        dN4 = [-0.25*(1+eta),0.25*(1-tsi)]
-        N_NatDeriv = [dN1,dN2,dN3,dN4]
-        N_GloDeriv = [[],[],[],[]]
-        
+    # Calling macroscale nodes into Sets
+    for n_macroele_nodes in range(4): # Loop through all nodes of the macroscale element
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-N'+str(j+1)+', instance='+str(MacroInstName) # Create a Set for the macroscale node
+        print>>Sets,str(NodalConnect[n_macro_eles][n_macroele_nodes]+1) # Node number of the macroscale node
+
+    # For each macroscale integration point
+    for n_macroele_GPs in range(len(GP)): # Loop through all integration points of the macroscale element
+        [tsi,eta] = GP[n_macroele_GPs] # Natural coordinates of the current integration point
+        J = np.array([[a1+a3*eta,b1+b3*eta],[a2+a3*tsi,b2+b3*tsi]]) # Jacobian matrix of the current integration point
+        J_inv = np.linalg.inv(J) # Inverse of the Jacobian matrix of the current integration point
+
+        # Shape function values at the current macroscale integration point
         Shape_fn = Bilin_Interpolation(tsi,eta)
+
+        # Expressions for the shape function gradients
+        # Derived by differentiating the shape functions wrt the natural coordinates
+        dN1 = [-0.25*(1-eta),-0.25*(1-tsi)] # Gradients of the shape function wrt tsi and eta for macroscale node 1
+        dN2 = [0.25*(1-eta),-0.25*(1+tsi)] # Gradients of the shape function wrt tsi and eta for macroscale node 2
+        dN3 = [0.25*(1+eta),0.25*(1+tsi)] # Gradients of the shape function wrt tsi and eta for macroscale node 3
+        dN4 = [-0.25*(1+eta),0.25*(1-tsi)] # Gradients of the shape function wrt tsi and eta for macroscale node 4
+        N_NatDeriv = [dN1,dN2,dN3,dN4] # List of shape function gradients wrt tsi and eta
+        N_GloDeriv = [[],[],[],[]] # List to store shape function gradients wrt to x and y
+                
+        # Calculating shape function gradients along x and y directions
+        # Obtained by multiplying the inverse of the Jacobian matrix with the shape function gradients wrt to tsi and eta
+        for n_macroele_nodes in range(4): # Loop through all nodes of the macroscale element
+            N_GloDeriv[n_macroele_nodes] = np.dot(J_inv,np.transpose(np.array(N_NatDeriv[n_macroele_nodes]))) # Matrix multiplication between the inverse of the Jacobian matrix and shape function gradients wrt tsi and eta
         
-        # Calculating shape function gradients
-        for k in range(4):
-            N_GloDeriv[k] = np.dot(J_inv,np.transpose(np.array(N_NatDeriv[k])))
-        
-        # Calling sets and setting up the MPCs for left and right faces
-        for k in range(len(PairingFacesLR)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
-            print>>Sets,str(PairingFacesLR[k][0]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
-            print>>Sets,str(PairingFacesLR[k][1]+1)
+        # Calling RVE node sets and setting up the MPCs for left and right face nodes
+        for n_FaceLR_nodepairs in range(len(PairingFacesLR)): # Loop through all left-right face node pairs
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeL'+str(n_FaceLR_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the left face node of the pair
+            print>>Sets,str(PairingFacesLR[n_FaceLR_nodepairs][0]+1) # Left face node number of the pair
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeR'+str(n_FaceLR_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the right face node of the pair
+            print>>Sets,str(PairingFacesLR[n_FaceLR_nodepairs][1]+1) # Right face node number of the pair
             
-            for dof in range(2):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-LR'+str(k+1)+'-DOF'+str(dof+1)
+            for n_RVEnode_dofs in range(2): # Loop through all DOFs of the nodes
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-LR'+str(n_FaceLR_nodepairs+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
-                print>>Eqns,'6'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', '+str(dof+1)+', 1.0'
-                for m in range(4):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(B_RVE*N_GloDeriv[m][0])
+                print>>Eqns,'6' # Number of terms in the Constraint
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeR'+str(n_FaceLR_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Right face node DOF, also the first DOF which will be removed
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeL'+str(n_FaceLR_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Left face node DOF
+                for n_macroele_nodes in range(4): # Loop through all macroscale nodes
+                    # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along x direction
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(B_RVE*N_GloDeriv[n_macroele_nodes][0]) # Macroscale node DOF
                     
         # Calling sets and setting up the MPCs for top and bottom faces
         for k in range(len(PairingFacesBT)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeB'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
             print>>Sets,str(PairingFacesBT[k][0]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeT'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
             print>>Sets,str(PairingFacesBT[k][1]+1)
             
             for dof in range(2):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-BT'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-BT'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'6'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(4):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
                     
         # Calling sets and setting up the MPCs for vertices
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
         print>>Sets,str(V1+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V2, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
         print>>Sets,str(V2+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V3, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V3, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
         print>>Sets,str(V3+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V4, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V4, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)
         print>>Sets,str(V4+1)
         
         for dof in range(2):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V23-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V23-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'6'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V3, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V3, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V2, '+str(dof+1)+', 1.0'
             for m in range(4):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
                 
         for dof in range(2):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V14-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V14-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'6'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V4, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V4, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, '+str(dof+1)+', 1.0'
             for m in range(4):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(H_RVE*N_GloDeriv[m][1])
                 
         for dof in range(2):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V12-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V12-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'6'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V2, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, '+str(dof+1)+', 1.0'
             for m in range(4):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(B_RVE*N_GloDeriv[m][0])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(B_RVE*N_GloDeriv[m][0])
                 
         for dof in range(2):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'5'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, '+str(dof+1)+', -1.0'
             for m in range(4):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(Shape_fn[m]-0.5*B_RVE*N_GloDeriv[m][0]-0.5*H_RVE*N_GloDeriv[m][1])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(Shape_fn[m]-0.5*B_RVE*N_GloDeriv[m][0]-0.5*H_RVE*N_GloDeriv[m][1])
 
 Sets.close()
 Eqns.close()
@@ -607,17 +617,22 @@ Revision log
 230714 Original  release
 
 240916 Revision
-Replaced 'remove' function with 'del' function in lines 102 and 137
+Replaced 'remove' function with 'del' function
 'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended 
 
-Added '+1' to line 180 of original code (currently line 185)
-When reading RVE material definitions, current code will miss the last line of the entire RVE input file
+Added '+1' to the end of RVE Material definition if the RVE input file has no further information
+When reading RVE Material definitions, previous code will miss the last line of the entire RVE input file
 
 End of 240916 Revision
 
 250519 Revision (WIP)
 Replaced variables with explanatory names
 Added additional comments for clarity
+Replace == with isclose
+Gaussian weight component
+Rename for linear macroscale
+Account for X1=0 cases when sorting for the macroscale element connectivity
+
 
 End of 250519 Revision
 
@@ -629,7 +644,7 @@ Account for BCs applied at Initial step when writing RVE materials, which appear
 Allow for (partial) reduced integration by changing the list of GP? adopt from code for ZB
 Account for multiple macroscale parts, multiple types of RVE and different RVE orientations? adopt from code for Yuhao
 Relabel J as J^T for better clarity
-Account for X1=0 cases when sorting for the macroscale element connectivity
+Merge with quadratic macroscale?
 '''     
         
             
