@@ -334,7 +334,7 @@ zMin = min(RVE_ListZ) # Smallest z coordinate
 zMax = max(RVE_ListZ) # Largest z coordinate
 del RVE_ListX # Remove the temporary list
 del RVE_ListY # Remove the temporary list
-del RVE_ListZ v
+del RVE_ListZ # Remove the temporary list
 
 # Sorting the RVE boundary nodes
 FaceLNodes,FaceRNodes,FaceBaNodes,FaceFNodes,FaceBNodes,FaceTNodes = [],[],[],[],[],[] # List to store the nodes on the RVE boundary faces
@@ -440,7 +440,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
         J = np.array([
                 [a1+a4*eta+a5*zeta+a7*eta*zeta,b1+b4*eta+b5*zeta+b7*eta*zeta,d1+d4*eta+d5*zeta+d7*eta*zeta],
                 [a2+a4*tsi+a6*zeta+a7*tsi*zeta,b2+b4*tsi+b6*zeta+b7*tsi*zeta,d2+d4*tsi+d6*zeta+d7*tsi*zeta],
-                [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]])  # Jacobian matrix of the current integration point
+                [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]]) # Jacobian matrix of the current integration point
        
         J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
         
@@ -483,83 +483,91 @@ Insts.close()
 
 
 ### Setting up the MPCs
-Sets = open('Sets.dat','w')
-Eqns = open('Eqns.dat','w')
+Sets = open('Sets.dat','w') # Open a temporary file to store information on DFE2 Sets
+Eqns = open('Eqns.dat','w') # Open a temporary file to store information on DFE2 MPCs
 
 # Pairing the nodes
-EdgeLNodes = TakeVertexOut(SortListofNodes1D(EdgeLNodes,2))
-EdgeRNodes = TakeVertexOut(SortListofNodes1D(EdgeRNodes,2))
-    
-EdgeBNodes = TakeVertexOut(SortListofNodes1D(EdgeBNodes,0))
-EdgeTNodes = TakeVertexOut(SortListofNodes1D(EdgeTNodes,0))
-    
-Edge1Nodes = TakeVertexOut(SortListofNodes1D(Edge1Nodes,1))
-Edge2Nodes = TakeVertexOut(SortListofNodes1D(Edge2Nodes,1))
-Edge3Nodes = TakeVertexOut(SortListofNodes1D(Edge3Nodes,1))
-Edge4Nodes = TakeVertexOut(SortListofNodes1D(Edge4Nodes,1))
+# Assume the RVE mesh is perfectly periodic
+# Left and right edges
+EdgeLNodes = TakeVertexOut(SortListofNodes1D(EdgeLNodes,2)) # Sort the left edge nodes based on their z coordinates and remove the two corner nodes
+EdgeRNodes = TakeVertexOut(SortListofNodes1D(EdgeRNodes,2)) # Sort the right edge nodes based on their z coordinates and remove the two corner nodes
 
-FaceBaNodes = SortListofNodes2D(FaceBaNodes,0,2)
-FaceFNodes = SortListofNodes2D(FaceFNodes,0,2)
-PairingFacesBaF = []
-for i in range(len(FaceBaNodes)):
-    Temp = []
-    Temp.append(FaceBaNodes[i])
-    x1 = RVENodalCoord[FaceBaNodes[i]][0]
-    z1 = RVENodalCoord[FaceBaNodes[i]][2]
-    
-    Dist = []
-    for j in range(len(FaceFNodes)):
-        x2 = RVENodalCoord[FaceFNodes[j]][0]
-        z2 = RVENodalCoord[FaceFNodes[j]][2]
-        
-        Dist.append(math.sqrt(pow(x2-x1,2)+pow(z2-z1,2)))
-        
-    N = Dist.index(min(Dist))
-    Temp.append(FaceFNodes[N])
-    FaceFNodes.pop(N)
-    PairingFacesBaF.append(Temp)    
+# Bottom and top edges
+EdgeBNodes = TakeVertexOut(SortListofNodes1D(EdgeBNodes,0)) # Sort the bottom edge nodes based on their x coordinates and remove the two corner nodes
+EdgeTNodes = TakeVertexOut(SortListofNodes1D(EdgeTNodes,0)) # Sort the top edge nodes based on their x coordinates and remove the two corner nodes
 
-FaceLNodes = SortListofNodes2D(ExcludeNodes(FaceLNodes,[],[RVENodalCoord[V3][1],RVENodalCoord[V6][1]],[RVENodalCoord[V3][2],RVENodalCoord[V6][2]]),1,2)
-FaceRNodes = SortListofNodes2D(ExcludeNodes(FaceRNodes,[],[RVENodalCoord[V3][1],RVENodalCoord[V6][1]],[RVENodalCoord[V3][2],RVENodalCoord[V6][2]]),1,2)
-PairingFacesLR = []
-for i in range(len(FaceLNodes)):
-    Temp = []
-    Temp.append(FaceLNodes[i])
-    y1 = RVENodalCoord[FaceLNodes[i]][1]
-    z1 = RVENodalCoord[FaceLNodes[i]][2]
-    
-    Dist = []
-    for j in range(len(FaceRNodes)):
-        y2 = RVENodalCoord[FaceRNodes[j]][1]
-        z2 = RVENodalCoord[FaceRNodes[j]][2]
-        
-        Dist.append(math.sqrt(pow(y2-y1,2)+pow(z2-z1,2)))
-        
-    N = Dist.index(min(Dist))
-    Temp.append(FaceRNodes[N])
-    FaceRNodes.pop(N)
-    PairingFacesLR.append(Temp)
+# 1, 2, 3, and 4 edges
+Edge1Nodes = TakeVertexOut(SortListofNodes1D(Edge1Nodes,1)) # Sort the 1 edge nodes based on their y coordinates and remove the two corner nodes
+Edge2Nodes = TakeVertexOut(SortListofNodes1D(Edge2Nodes,1)) # Sort the 2 edge nodes based on their y coordinates and remove the two corner nodes
+Edge3Nodes = TakeVertexOut(SortListofNodes1D(Edge3Nodes,1)) # Sort the 3 edge nodes based on their y coordinates and remove the two corner nodes
+Edge4Nodes = TakeVertexOut(SortListofNodes1D(Edge4Nodes,1)) # Sort the 4 edge nodes based on their y coordinates and remove the two corner nodes
 
-FaceBNodes = SortListofNodes2D(ExcludeNodes(FaceBNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[]),0,1)
-FaceTNodes = SortListofNodes2D(ExcludeNodes(FaceTNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[]),0,1)
-PairingFacesBT = []
-for i in range(len(FaceBNodes)):
-    Temp = []
-    Temp.append(FaceBNodes[i])
-    x1 = RVENodalCoord[FaceBNodes[i]][0]
-    y1 = RVENodalCoord[FaceBNodes[i]][1]
+# Back and front faces
+FaceBaNodes = SortListofNodes2D(FaceBaNodes,0,2) # Sort the back face nodes based on their x and z coordinates
+FaceFNodes = SortListofNodes2D(FaceFNodes,0,2) # Sort the front face nodes based on their x and z coordinates
+PairingFacesBaF = [] # List to store the paired back and front face nodes
+for n_FaceBa_nodes in range(len(FaceBaNodes)): # Loop through the back face nodes
+    Temp = [] # Temporary list to store each pair of back and front face nodes
+    Temp.append(FaceBaNodes[n_FaceBa_nodes]) # Back face node number of the pair
+    x1 = RVENodalCoord[FaceBaNodes[n_FaceBa_nodes]][0] # x coordinate of the back face node of the pair
+    z1 = RVENodalCoord[FaceBaNodes[n_FaceBa_nodes]][2] # z coordinate of the back face node of the pair
+
+    # Find the front face node for pairing based on the shortest in-plane distance with the current back face node
+    Dist = [] # Temporary list to store in-plane distance between each front face node with the current back face node
+    for n_FaceF_nodes in range(len(FaceFNodes)): # Loop through the front face nodes
+        x2 = RVENodalCoord[FaceFNodes[n_FaceF_nodes]][0] # x coordinate of the front face node
+        z2 = RVENodalCoord[FaceFNodes[n_FaceF_nodes]][2] # z coordinate of the front face node
+        
+        Dist.append(math.sqrt(pow(x2-x1,2)+pow(z2-z1,2))) # In-plane distance between current front face node with the current back face node
+        
+    Ind_dist = Dist.index(min(Dist)) # Index the front face node with the smallest in-plane distance from the current back face node as the node to be paired
+    Temp.append(FaceFNodes[Ind_dist]) # Front face node number of the pair
+    FaceFNodes.pop(Ind_dist) # Remove the paired front face node from the list to reduce pairing time for subsequent back face nodes
+    PairingFacesBaF.append(Temp) # Store the pair of node numbers into the back-front list
+
+FaceLNodes = SortListofNodes2D(ExcludeNodes(FaceLNodes,[],[RVENodalCoord[V3][1],RVENodalCoord[V6][1]],[RVENodalCoord[V3][2],RVENodalCoord[V6][2]]),1,2) # Sort the left face nodes based on their y and z coordinates, excluding nodes on the edges using the y and z coordinates of V3 and V6
+FaceRNodes = SortListofNodes2D(ExcludeNodes(FaceRNodes,[],[RVENodalCoord[V3][1],RVENodalCoord[V6][1]],[RVENodalCoord[V3][2],RVENodalCoord[V6][2]]),1,2) # Sort the right face nodes based on their y and z coordinates, excluding nodes on the edges using the y and z coordinates of V3 and V6
+PairingFacesLR = [] # List to store the paired left and right face nodes
+for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through the left face nodes
+    Temp = [] # Temporary list to store each pair of left and right face nodes
+    Temp.append(FaceLNodes[n_FaceL_nodes]) # Left face node number of the pair
+    y1 = RVENodalCoord[FaceLNodes[n_FaceL_nodes]][1] # y coordinate of the left face node of the pair
+    z1 = RVENodalCoord[FaceLNodes[n_FaceL_nodes]][2] # z coordinate of the left face node of the pair
+
+    # Find the right face node for pairing based on the shortest in-plane distance with the current left face node
+    Dist = [] # Temporary list to store in-plane distance between each right face node with the current left face node
+    for n_FaceR_nodes in range(len(FaceRNodes)): # Loop through the right face nodes
+        y2 = RVENodalCoord[FaceRNodes[j]][1] # y coordinate of the right face node
+        z2 = RVENodalCoord[FaceRNodes[j]][2] # z coordinate of the right face node
+        
+        Dist.append(math.sqrt(pow(y2-y1,2)+pow(z2-z1,2))) # In-plane distance between current right face node with the current left face node
+        
+    Ind_dist = Dist.index(min(Dist)) # Index the right face node with the smallest in-plane distance from the current left face node as the node to be paired
+    Temp.append(FaceRNodes[Ind_dist]) # Right face node number of the pair
+    FaceRNodes.pop(Ind_dist) # Remove the paired right face node from the list to reduce pairing time for subsequent left face nodes
+    PairingFacesLR.append(Temp) # Store the pair of node numbers into the left-right list
+
+FaceBNodes = SortListofNodes2D(ExcludeNodes(FaceBNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[]),0,1) # Sort the bottom face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
+FaceTNodes = SortListofNodes2D(ExcludeNodes(FaceTNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[]),0,1) # Sort the top face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
+PairingFacesBT = [] # List to store the paired bottom and top face nodes
+for n_FaceB_nodes in range(len(FaceBNodes)): # Loop through the bottom face nodes
+    Temp = [] # Temporary list to store each pair of bottom and top face nodes
+    Temp.append(FaceBNodes[n_FaceB_nodes]) # Bottom face node number of the pair
+    x1 = RVENodalCoord[FaceBNodes[n_FaceB_nodes]][0] # x coordinate of the bottom face node of the pair
+    y1 = RVENodalCoord[FaceBNodes[n_FaceB_nodes]][1] # y coordinate of the bottom face node of the pair
     
-    Dist = []
-    for j in range(len(FaceTNodes)):
-        x2 = RVENodalCoord[FaceTNodes[j]][0]
-        y2 = RVENodalCoord[FaceTNodes[j]][1]
+    # Find the top face node for pairing based on the shortest in-plane distance with the current bottom face node
+    Dist = [] # Temporary list to store in-plane distance between each top face node with the current bottom face node
+    for n_FaceT_nodes in range(len(FaceTNodes)): # Loop through the top face nodes
+        x2 = RVENodalCoord[FaceTNodes[n_FaceT_nodes]][0] # x coordinate of the top face node of the pair
+        y2 = RVENodalCoord[FaceTNodes[n_FaceT_nodes]][1] # y coordinate of the top face node of the pair
         
-        Dist.append(math.sqrt(pow(x2-x1,2)+pow(y2-y1,2)))
+        Dist.append(math.sqrt(pow(x2-x1,2)+pow(y2-y1,2))) # In-plane distance between current top face node with the current bottom face node
         
-    N = Dist.index(min(Dist))
-    Temp.append(FaceTNodes[N])
-    FaceTNodes.pop(N)
-    PairingFacesBT.append(Temp)
+    Ind_dist = Dist.index(min(Dist)) # Index the top face node with the smallest in-plane distance from the current bottom face node as the node to be paired
+    Temp.append(FaceTNodes[Ind_dist]) # Top face node number of the pair
+    FaceTNodes.pop(Ind_dist) # Remove the paired top face node from the list to reduce pairing time for subsequent bottom face nodes
+    PairingFacesBT.append(Temp) # Store the pair of node numbers into the bottom-top list
 
 # Calculating the coefficients and setting up the MPCs
 for i in range(N_macro_eles):
@@ -892,7 +900,7 @@ Revision log
 230714 Original  release
 
 240916 Revision
-Replaced 'remove' function with 'del' function in lines 147 and 182
+Replaced 'remove' function with 'del' function
 'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended 
 
 End of Revision
