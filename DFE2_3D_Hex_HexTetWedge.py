@@ -570,7 +570,9 @@ for n_FaceB_nodes in range(len(FaceBNodes)): # Loop through the bottom face node
     PairingFacesBT.append(Temp) # Store the pair of node numbers into the bottom-top list
 
 # Calculating the coefficients and setting up the MPCs
-for i in range(N_macro_eles):
+# For each macroscale element
+for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
+    # Same mapping function between natural and global coordinates
     C = np.array([
             [1,-1,-1,-1,1,1,1,-1],
             [1,1,-1,-1,-1,-1,1,1],
@@ -579,20 +581,20 @@ for i in range(N_macro_eles):
             [1,-1,-1,1,1,-1,-1,1],
             [1,1,-1,1,-1,1,-1,-1],
             [1,1,1,1,1,1,1,1],
-            [1,-1,1,1,-1,-1,1,-1],])
-    C_inv = np.linalg.inv(C)
-    [a0,a1,a2,a3,a4,a5,a6,a7] = np.dot(C_inv,NodalCoordX[i])
-    [b0,b1,b2,b3,b4,b5,b6,b7] = np.dot(C_inv,NodalCoordY[i])
-    [d0,d1,d2,d3,d4,d5,d6,d7] = np.dot(C_inv,NodalCoordZ[i])
+            [1,-1,1,1,-1,-1,1,-1],]) # Same matrix of natural coordinates based on the mapping function between natural and global coordinates
+    C_inv = np.linalg.inv(C) # Inverse of matrix C
+    [a0,a1,a2,a3,a4,a5,a6,a7] = np.dot(C_inv,NodalCoordX[n_macro_eles]) # Coefficient a
+    [b0,b1,b2,b3,b4,b5,b6,b7] = np.dot(C_inv,NodalCoordY[n_macro_eles]) # Coefficient b
+    [d0,d1,d2,d3,d4,d5,d6,d7] = np.dot(C_inv,NodalCoordZ[n_macro_eles]) # Coefficient c
     
-    # Calling macroscale nodes into sets
-    for j in range(8):
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-N'+str(j+1)+', instance='+str(MacroInstName)
-        print>>Sets,str(NodalConnect[i][j]+1)
+    # Call macroscale nodes into sets
+    for n_macroele_nodes in range(8): # Loop through all nodes of the macroscale element
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', instance='+str(MacroInstName) # Create a Set for the macroscale node
+        print>>Sets,str(NodalConnect[n_macro_eles][n_macroele_nodes]+1) # Node number of the macroscale node
         
-    # At each macroscale GP
-    for j in range(8): # 8 GPs
-        [tsi,eta,zeta] = GP[j]
+    # For each macroscale integration point
+    for j in range(len(GP)): # Loop through all integration points of the macroscale element
+        [tsi,eta,zeta] = GP[j] # Natural coordinates of the current integration point
         
         J = np.array([
                 [a1+a4*eta+a5*zeta+a7*eta*zeta,b1+b4*eta+b5*zeta+b7*eta*zeta,d1+d4*eta+d5*zeta+d7*eta*zeta],
@@ -624,166 +626,166 @@ for i in range(N_macro_eles):
         
         # Calling sets and setting up the MPCs for the left and right boundaries of FaceBa
         for k in range(len(EdgeLNodes)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeL'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeL'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(EdgeLNodes[k]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeR'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeR'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(EdgeRNodes[k]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeLR'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeLR'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeR'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeL'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeR'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeL'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
                     
         # Calling sets and setting up the MPCs for top and bottom boundaries of FaceBa
         for k in range(len(EdgeBNodes)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeB'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeB'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(EdgeBNodes[k]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeT'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeT'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(EdgeTNodes[k]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeLR'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeLR'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-EdgeNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-EdgeNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
                     
         # Calling sets and setting up the MPCs for corners of FaceBa
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V1, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
         print>>Sets,str(V1+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V2, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
         print>>Sets,str(V2+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V3, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V3, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
         print>>Sets,str(V3+1)
-        print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-V4, instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V4, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
         print>>Sets,str(V4+1)
         
         for dof in range(3):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V12-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V12-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'10'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
             for m in range(8):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
                 
         for dof in range(3):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V23-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V23-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'10'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V3, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V3, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V2, '+str(dof+1)+', 1.0'
             for m in range(8):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
                 
         for dof in range(3):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V14-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V14-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'10'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V4, '+str(dof+1)+', -1.0'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V4, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', 1.0'
             for m in range(8):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
                 
         for dof in range(3):
-            print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1-DOF'+str(dof+1)
+            print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V1-DOF'+str(dof+1)
             print>>Eqns,'*Equation'
             print>>Eqns,'9'
-            print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', -1.0'
+            print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-V1, '+str(dof+1)+', -1.0'
             for m in range(8):
-                print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(Shape_fn[m]-0.5*dx*N_GloDeriv[m][0]-0.5*dy*N_GloDeriv[m][1]-0.5*dz*N_GloDeriv[m][2])
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(Shape_fn[m]-0.5*dx*N_GloDeriv[m][0]-0.5*dy*N_GloDeriv[m][1]-0.5*dz*N_GloDeriv[m][2])
             
         # Calling sets and setting up the MPCs for the front and back faces
         for k in range(len(PairingFacesBaF)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeBa'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeBa'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesBaF[k][0]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeF'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeF'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesBaF[k][1]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-BaF'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-BaF'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeF'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeBa'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeF'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeBa'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dy*N_GloDeriv[m][1])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dy*N_GloDeriv[m][1])
                     
         # Calling sets and setting up the MPCs for the edges parallel to y axis
         for k in range(len(Edge1Nodes)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(Edge1Nodes[k]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(Edge2Nodes[k]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge3Node'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge3Node'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(Edge3Nodes[k]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge4Node'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge4Node'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(Edge4Nodes[k]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge12Node'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge12Node'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
                     
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge23Node'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge23Node'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge3Node'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge3Node'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge2Node'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
                     
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge14Node'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge14Node'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge4Node'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge4Node'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-Edge1Node'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
                     
         # Calling sets and setting up the MPCs for the left and right faces
         for k in range(len(PairingFacesLR)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesLR[k][0]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesLR[k][1]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-LR'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-LR'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeR'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeL'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dx*N_GloDeriv[m][0])
                     
         # Calling sets and setting up the MPCs for the top and bottom faces
         for k in range(len(PairingFacesBT)):
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesBT[k][0]+1)
-            print>>Sets,'*Nset, nset=Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', instance=Ele'+str(i+1)+'-RVE'+str(j+1)
+            print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)
             print>>Sets,str(PairingFacesBT[k][1]+1)
             
             for dof in range(3):
-                print>>Eqns,'** Constraint: Ele'+str(i+1)+'-RVE'+str(j+1)+'-BT'+str(k+1)+'-DOF'+str(dof+1)
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-BT'+str(k+1)+'-DOF'+str(dof+1)
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
-                print>>Eqns,'Ele'+str(i+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeT'+str(k+1)+', '+str(dof+1)+', -1.0'
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(j+1)+'-FaceNodeB'+str(k+1)+', '+str(dof+1)+', 1.0'
                 for m in range(8):
-                    print>>Eqns,'Ele'+str(i+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
+                    print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(m+1)+', '+str(dof+1)+', '+str(dz*N_GloDeriv[m][2])
             
 Sets.close()
 Eqns.close()
