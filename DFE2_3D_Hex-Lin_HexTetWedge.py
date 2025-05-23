@@ -5,22 +5,31 @@ Created on Sun Jul 16 14:40:46 2023
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
 """
 
+### Importing required libraries
 import os
 import numpy as np
 import math
 
-### Update the following parameters
-os.chdir('E:\\Kirk Ming Abaqus\\DFE2_Demo') # Directory where input files are, use double '\'
-MacroInpName = 'Demo_3D_Macro.inp' # Name of macroscale input file
-RVEInpName = 'Demo_3D_RVE.inp' # Name of RVE input file 
-NewInpName = 'DFE2_3D.inp' # Name of new Direct FE2 input file
+### Obtain the user-defined inputs
+# Read the user-defined inputs
+execfile('DFE2_0_UserInput.py')
 
-'''
-No further user input is required
-'''
+# Defining the macroscale integration points for full integration if not specified
+if GP == '':
+    GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]]
 
-GP = [[-3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,3**-0.5,3**-0.5],[-3**-0.5,3**-0.5,3**-0.5]]
+# Defining the Gaussian weights based on the integration points
+if len(GP) == 1:
+    Weight = 4.0
+elif len(GP) == 2:
+    Weight = 2.0
+elif len(GP) == 4:
+    Weight = 1.0
 
+# Defining the tolerance if not specified
+if Tol == '':
+    Tol = 1e-6
+    
 ### Define functions
 # Search inp list for a particular part's elements and nodes
 def Search(inp,key1,out1,type1): # If dealing with nodes and coordinates, set type1 to 1 
@@ -341,17 +350,17 @@ FaceLNodes,FaceRNodes,FaceBaNodes,FaceFNodes,FaceBNodes,FaceTNodes = [],[],[],[]
 EdgeLNodes, EdgeRNodes, EdgeBNodes, EdgeTNodes = [],[],[],[] # List to store the nodes on the RVE boundary edges attached to the back face
 Edge1Nodes, Edge2Nodes, Edge3Nodes, Edge4Nodes = [],[],[],[] # List to store the nodes on the RVE boundary edges parallel to the y axis
 for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
-    if RVENodalCoord[n_RVE_nodes][0] == xMin: # If the nodal x coordinate matches the RVE smallest x coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMin,abs_tol=Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
         FaceLNodes.append(n_RVE_nodes) # Store the node the left face list
-    if RVENodalCoord[n_RVE_nodes][0] == xMax:  # If the nodal x coordinate matches the RVE largest x coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMax,abs_tol=Tol):  # If the nodal x coordinate matches the RVE largest x coordinate
         FaceRNodes.append(n_RVE_nodes) # Store the node the right face list
-    if RVENodalCoord[n_RVE_nodes][1] == yMin: # If the nodal y coordinate matches the RVE smallest y coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMin,abs_tol=Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
         FaceBaNodes.append(n_RVE_nodes) # Store the node the back face list
-    if RVENodalCoord[n_RVE_nodes][1] == yMax:  # If the nodal y coordinate matches the RVE largest y coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMax,abs_tol=Tol):  # If the nodal y coordinate matches the RVE largest y coordinate
         FaceFNodes.append(n_RVE_nodes) # Store the node the front face list
-    if RVENodalCoord[n_RVE_nodes][2] == zMin: # If the nodal z coordinate matches the RVE smallest z coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][2],zMin,abs_tol=Tol): # If the nodal z coordinate matches the RVE smallest z coordinate
         FaceBNodes.append(n_RVE_nodes) # Store the node the bottom face list
-    if RVENodalCoord[n_RVE_nodes][2] == zMax:  # If the nodal z coordinate matches the RVE largest z coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][2],zMax,abs_tol=Tol):  # If the nodal z coordinate matches the RVE largest z coordinate
         FaceTNodes.append(n_RVE_nodes) # Store the node the top face list
 for n_FaceBa_nodes in range(len(FaceBaNodes)): # Loop through all nodes in the back face list
     if FaceBaNodes[n_FaceBa_nodes] in FaceLNodes: # If the node is also in the left face list
@@ -444,7 +453,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
        
         J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
         
-        if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so == 
+        if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so 
             Ind_SF = SF.index(round(J_RVE,5)) # Index of the first instance of this volume scaling factor
         else: # Create a new RVE with this current volume scaling factor if it has not been used before
             Ind_SF = len(SF) # Index the new volume scaling factor as the next term in the list
@@ -953,6 +962,15 @@ Revisions for improved clarity:
 Replaced one letter, non-descriptive variables with more explanatory variable names
 Added additional comments to most lines to explain their functoions
 Renamed the file to clarify that it is meant for linear quadrilateral macroscale elements
+
+Replaced all == floating point comparisons wth isclose() functions
+More portable and flexible comparison for floating point numbers
+
+Revised the user-defined input section to read another Python script
+Prevents users from modifying this current script unless necessary
+
+Revised the GP and Gaussian weight section
+Allows for more flexibility to use reduced integration if desired
 
 End of 250519 Revision
 
