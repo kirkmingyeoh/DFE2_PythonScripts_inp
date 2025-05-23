@@ -174,7 +174,7 @@ for n_inp2_lines in range(len(inp2)): # Search through all lines in the RVE inpu
     if (inp2[n_inp2_lines].count('*Material'))!=0: # Find the lines defining the start of each RVE Material, using the keyword '*Material'
         Materials.append(n_inp2_lines) # Store the first line number for each RVE Material
 
-RVEMats = open('RVEMats.dat','w') # Open a temporary file to store information on RVE Materials
+RVEMats = open('RVEMats.dat','w') # Create a temporary file to store information on RVE Materials
 for n_inp2_lines in range(len(Materials)): # Loop through each RVE Material
     for n2_inp2_lines in range(Materials[n_inp2_lines]+1,len(inp2)): # Search for the end of each RVE Material definition, starting from the line after the first line
         if (inp2[n2_inp2_lines].count('*Material'))!=0 or (inp2[n2_inp2_lines].count('**'))!=0: # Start of next RVE Material or other definition, marked with the keywords '*Material' or '**' respectively 
@@ -187,7 +187,7 @@ RVEMats.close()
 
 
 ### Processing the macroscale part information
-# Sorting the nodal connectivity to match with DFE2 conventions
+# Sorting the nodal connectivity to match with Direct FE2 conventions
 N_macro_eles = len(MacroNodalConnect) # Total number of macroscale elements
 NodalConnect = [] # List to store sorted macroscale element nodal connectivities
 NodalCoordX = [] # List to store nodal x coordinates based on sorted macroscale element nodal connectivities
@@ -230,7 +230,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     SAng = sorted(Ang) # Sort the angles 
 
     # Sort the nodes based on the sorted angles
-    # The sorted order is based on DFE2 conventions
+    # The sorted order is based on Direct FE2 conventions
     # The first node has natural coordinates [-1,-1], which is expected to have the 3rd sorted angle
     # The other nodes are found by going about the macroscale element in a counter-clockwise fashion
     Order = [2,3,0,1]
@@ -296,8 +296,8 @@ for n_RVE_node in RVENodalCoord: # Loop through all RVE nodes
         
 
 ### Generating the RVE placement in the macroscale mesh
-RVEParts = open('RVEParts.dat','w') # Open a temporary file to store information on RVE Parts
-Insts = open('Insts.dat','w') # Open a temporary file to store information on RVE Instances
+RVEParts = open('RVEParts.dat','w') # Create a temporary file to store information on RVE Parts
+Insts = open('Insts.dat','w') # Create a temporary file to store information on RVE Instances
 SF = [] # List to store required RVE volume scaling factors
 for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     # Calculate the mapping function between natural and global coordinates
@@ -362,8 +362,8 @@ Insts.close()
 
             
 ### Setting up the MPCs
-Sets = open('Sets.dat','w') # Open a temporary file to store information on DFE2 Sets
-Eqns = open('Eqns.dat','w') # Open a temporary file to store information on DFE2 MPCs
+Sets = open('Sets.dat','w') # Create a temporary file to store information on Direct FE2 Sets
+Eqns = open('Eqns.dat','w') # Create a temporary file to store information on Direct FE2 MPCs
 
 # Pairing the nodes
 # Assume the RVE mesh is perfectly periodic
@@ -452,8 +452,8 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
                 print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-BT'+str(n_FaceBT_nodepairs+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'6' # Number of terms in the Constraint
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeT'+str(n_FaceBT_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Bottom face node DOF, also the first DOF which will be removed
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeB'+str(n_FaceBT_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Top face node DOF
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeT'+str(n_FaceBT_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Top face node DOF, also the first DOF which will be removed
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeB'+str(n_FaceBT_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Bottom face node DOF
                 for n_macroele_nodes in range(4): # Loop through all macroscale nodes
                     # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along y direction
                     print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(H_RVE*N_GloDeriv[n_macroele_nodes][1]) # Macroscale node DOF
@@ -508,7 +508,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
             print>>Eqns,'5' # Number of terms in the Constraint
             print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, '+str(n_RVEnode_dofs+1)+', -1.0' # V1 node DOF, also the first DOF which will be removed
             for n_macroele_nodes in range(4): # Loop through all macroscale nodes
-                # Coefficient of the macroscale node term obtained by as shape function values at RVE centroid (or macroscale integration point) subtracted with half ogRVE dimensions multiplied with macroscale shape function along both x and y directions
+                # Coefficient of the macroscale node term obtained by as shape function values at RVE centroid (or macroscale integration point) subtracted with half of RVE dimensions multiplied with macroscale shape function along x and y directions
                 print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(Shape_fn[n_macroele_nodes]-0.5*B_RVE*N_GloDeriv[n_macroele_nodes][0]-0.5*H_RVE*N_GloDeriv[n_macroele_nodes][1])
 
 Sets.close()
@@ -516,18 +516,22 @@ Eqns.close()
 
 
 ### Writing the new Direct FE2 input file
-RVEParts = open('RVEParts.dat','r')
-Insts = open('Insts.dat','r')
-Sets = open('Sets.dat','r')
-Eqns = open('Eqns.dat','r')
-RVEMats = open('RVEMats.dat','r')
+# Read the information written previously
+# Opening the files containing the information
+RVEParts = open('RVEParts.dat','r') # RVE Parts
+Insts = open('Insts.dat','r') # RVE Instances
+Sets = open('Sets.dat','r') # Sets
+Eqns = open('Eqns.dat','r') # MPCs
+RVEMats = open('RVEMats.dat','r') # Materials
 
-RVEParts_lines = []
-Insts_lines = []
-Sets_lines = []
-Eqns_lines = []
-RVEMats_lines = []
+# Empty lists to store the information
+RVEParts_lines = [] # RVE Parts
+Insts_lines = [] # RVE Instances
+Sets_lines = [] # Sets
+Eqns_lines = [] # MPCs
+RVEMats_lines = [] # Materials
 
+# Read the lines containing the RVE Parts
 while 1:
     line = RVEParts.readline()
     if not line:
@@ -535,27 +539,31 @@ while 1:
     line = line.strip()
     RVEParts_lines.append(line)
 
+# Read the lines containing the RVE Instances
 while 1:
     line = Insts.readline()
     if not line:
         break
     line = line.strip()
     Insts_lines.append(line)
-    
+
+# Read the lines containing the Sets
 while 1:
     line = Sets.readline()
     if not line:
         break
     line = line.strip()
     Sets_lines.append(line)
-    
+
+# Read the lines containing the MPCs
 while 1:
     line = Eqns.readline()
     if not line:
         break
     line = line.strip()
     Eqns_lines.append(line)
-    
+
+# Read the lines containing the Materials
 while 1:
     line = RVEMats.readline()
     if not line:
@@ -569,45 +577,56 @@ Sets.close()
 Eqns.close()
 RVEMats.close()
         
-f3 = open(NewInpName,'w')
+f3 = open(NewInpName,'w') # Create the final Direct FE2 input file
 
+# Print from the header in the macroscale input file until the end of the macroscale Part
 Mark1 = inp1.index('*End Part')
-for i in range(0,Mark1+1):
-    print>>f3,inp1[i]
+for n_inp1_lines in range(0,Mark1+1):
+    print>>f3,inp1[n_inp1_lines]
 
-for i in range(len(RVEParts_lines)):
-    print>>f3,RVEParts_lines[i] 
-    
+# Print the information on RVE Parts
+for n_RVEParts_lines in range(len(RVEParts_lines)):
+    print>>f3,RVEParts_lines[n_RVEParts_lines] 
+
+# Print from the end of the macroscale Part in the macroscale input file until the end of the macroscale Instance
 Mark2 = inp1.index('*End Instance')
-for i in range(Mark1+1,Mark2+2):
-    print>>f3,inp1[i]
-    
-for i in range(len(Insts_lines)):
-    print>>f3,Insts_lines[i]
+for n_inp1_lines in range(Mark1+1,Mark2+2):
+    print>>f3,inp1[n_inp1_lines]
 
-if StartConst == 'a':
-    StartConst = inp1.index('*End Assembly')    
-for i in range(Mark2+2,StartConst):
-    print>>f3,inp1[i]
+# Print the information on RVE Instances
+for n_RVEInsts_lines in range(len(Insts_lines)):
+    print>>f3,Insts_lines[n_RVEInsts_lines]
 
-for i in range(len(Sets_lines)):
-    print>>f3,Sets_lines[i]
-    
-for i in range(len(Eqns_lines)):
-    print>>f3,Eqns_lines[i]                    
-        
+# Print from the end of the macroscale Instance in the macroscale input file until the end of Assembly, including any macroscale Constraints 
+if StartConst == 'a': # If there are no macroscale Constraints
+    StartConst = inp1.index('*End Assembly') # Index the end of Assembly in the macroscale input file   
+for n_inp1_lines in range(Mark2+2,StartConst):
+    print>>f3,inp1[n_inp1_lines]
+
+# Print the information on Sets
+for n_Sets_lines in range(len(Sets_lines)):
+    print>>f3,Sets_lines[n_Sets_lines]
+
+# Print the information on MPCs
+for n_MPCs_lines in range(len(Eqns_lines)):
+    print>>f3,Eqns_lines[n_MPCs_lines]                    
+
+# Print from the end of Assembly in the macroscale input file until the end of Materials
 Mark3 = inp1.index('** ----------------------------------------------------------------')
-for i in range(StartConst,Mark3):
-    print>>f3,inp1[i]
+for n_inp1_lines in range(StartConst,Mark3):
+    print>>f3,inp1[n_inp1_lines]
 
-for i in range(len(RVEMats_lines)):
-    print>>f3,RVEMats_lines[i]
-    
-for i in range(Mark3,len(inp1)):
-    print>>f3,inp1[i]
+# Print the information on RVE Materials
+for n_RVEMats_lines in range(len(RVEMats_lines)):
+    print>>f3,RVEMats_lines[n_RVEMats_lines]
+
+# Print from the end of Materials in the macroscale input file until the end of the file
+for n_inp1_lines in range(Mark3,len(inp1)):
+    print>>f3,inp1[n_inp1_lines]
     
 f3.close()
 
+# Delete the temporary lists and files 
 del RVEParts_lines
 del Insts_lines
 del Sets_lines
@@ -635,11 +654,16 @@ When reading RVE Material definitions, previous code will miss the last line of 
 End of 240916 Revision
 
 250519 Revision (WIP)
-Replaced variables with explanatory names
-Added additional comments for clarity
+Revisions for improved clarity:
+Replaced one letter, non-descriptive variables with more explanatory variable names
+Added additional comments to most lines to explain their functoions
+Renamed the file to clarify that it is meant for linear quadrilateral macroscale elements
+
+
+
+
 Replace == with isclose
 Gaussian weight component
-Rename for linear macroscale
 Account for X1=0 cases when sorting for the macroscale element connectivity
 Separate user input structure
 
