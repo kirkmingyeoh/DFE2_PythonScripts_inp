@@ -424,7 +424,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
         for n_macroele_nodes in range(4): # Loop through all nodes of the macroscale element
             N_GloDeriv[n_macroele_nodes] = np.dot(J_inv,np.transpose(np.array(N_NatDeriv[n_macroele_nodes]))) # Matrix multiplication between the inverse of the Jacobian matrix and shape function gradients wrt tsi and eta
         
-        # Call RVE node Sets and set up the MPCs for left and right face nodes
+        # Call Sets and set up the MPCs for left and right face nodes
         for n_FaceLR_nodepairs in range(len(PairingFacesLR)): # Loop through all left-right face node pairs
             print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeL'+str(n_FaceLR_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the left face node of the pair
             print>>Sets,str(PairingFacesLR[n_FaceLR_nodepairs][0]+1) # Left face node number of the pair
@@ -441,7 +441,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
                     # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along x direction
                     print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(B_RVE*N_GloDeriv[n_macroele_nodes][0]) # Macroscale node DOF
                     
-        # Call RVE node Sets and set up the MPCs for bottom and top face nodes
+        # Call Sets and set up the MPCs for bottom and top face nodes
         for n_FaceBT_nodepairs in range(len(PairingFacesBT)): # Loop through all bottom-top face node pairs
             print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeB'+str(n_FaceBT_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the bottom face node of the pair
             print>>Sets,str(PairingFacesBT[n_FaceBT_nodepairs][0]+1) # Bottom face node number of the pair
@@ -458,7 +458,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
                     # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along y direction
                     print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(H_RVE*N_GloDeriv[n_macroele_nodes][1]) # Macroscale node DOF
                     
-        # Call Sets and et up the MPCs for vertices
+        # Call Sets and set up the MPCs for vertices
         print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V1, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the node V1
         print>>Sets,str(V1+1) # Node number for V1
         print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-V2, instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the node V2
