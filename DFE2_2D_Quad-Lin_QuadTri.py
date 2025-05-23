@@ -231,7 +231,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
         X1 = X[n_macroele_nodes]-X0 # Difference in x coordinate
         Y1 = Y[n_macroele_nodes]-Y0 # Difference in y coordinate
-        if FPisclose(X1,0.0,abs_tol=Tol): # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
+        if FPisclose(X1,0.0,Tol): # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
             if Y1>0: # If the node is above the centroid
                 theta = 0.5*(math.pi)
             else: # If the node is below the centroid
@@ -279,13 +279,13 @@ del RVE_ListY # Remove the temporary list
 # Sorting the RVE boundary nodes
 FaceLNodes,FaceRNodes,FaceBNodes,FaceTNodes = [],[],[],[] # List to store the nodes on the RVE boundaries
 for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
-    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMin,abs_tol=Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMin,Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
         FaceLNodes.append(n_RVE_nodes) # Store the node the left face list
-    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMax,abs_tol=Tol): # If the nodal x coordinate matches the RVE largest x coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMax,Tol): # If the nodal x coordinate matches the RVE largest x coordinate
         FaceRNodes.append(n_RVE_nodes) # Store the node the right face list
-    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMin,abs_tol=Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMin,Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
         FaceBNodes.append(n_RVE_nodes) # Store the node the bottom face list
-    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMax,abs_tol=Tol): # If the nodal y coordinate matches the RVE largest y coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMax,Tol): # If the nodal y coordinate matches the RVE largest y coordinate
         FaceTNodes.append(n_RVE_nodes) # Store the node the front face list
 for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through all nodes in the left face list
     if FaceLNodes[n_FaceL_nodes] in FaceBNodes: # If the node is also in the bottom face list
