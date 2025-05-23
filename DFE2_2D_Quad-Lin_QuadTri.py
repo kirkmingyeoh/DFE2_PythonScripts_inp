@@ -76,6 +76,13 @@ def SortListofNodes1D(faceN,coordinate): # Coordinates: 0 for x; 1 for y; 2 for 
     
     return newlist # Returns a list of sorted nodes in terms of node numbers ready to be called with python (already -1)
 
+# isclose equivalent comparison for floating point numbers
+# Some versions of Abaqus Python IDE have older numpy modules which do not have the standard isclose()
+def FPisclose(FP1,FP2,tolerance):
+    if (abs(FP1-FP2) <= tolerance):
+        return 1
+    else:
+        return 0
 
 ### Extracting information from Macro and RVE input files
 # Macroscale input file
@@ -224,7 +231,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
         X1 = X[n_macroele_nodes]-X0 # Difference in x coordinate
         Y1 = Y[n_macroele_nodes]-Y0 # Difference in y coordinate
-        if math.isclose(X1,0.0,abs_tol=Tol): # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
+        if FPisclose(X1,0.0,abs_tol=Tol): # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
             if Y1>0: # If the node is above the centroid
                 theta = 0.5*(math.pi)
             else: # If the node is below the centroid
@@ -272,13 +279,13 @@ del RVE_ListY # Remove the temporary list
 # Sorting the RVE boundary nodes
 FaceLNodes,FaceRNodes,FaceBNodes,FaceTNodes = [],[],[],[] # List to store the nodes on the RVE boundaries
 for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
-    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMin,abs_tol=Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMin,abs_tol=Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
         FaceLNodes.append(n_RVE_nodes) # Store the node the left face list
-    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMax,abs_tol=Tol): # If the nodal x coordinate matches the RVE largest x coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][0],xMax,abs_tol=Tol): # If the nodal x coordinate matches the RVE largest x coordinate
         FaceRNodes.append(n_RVE_nodes) # Store the node the right face list
-    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMin,abs_tol=Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMin,abs_tol=Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
         FaceBNodes.append(n_RVE_nodes) # Store the node the bottom face list
-    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMax,abs_tol=Tol): # If the nodal y coordinate matches the RVE largest y coordinate
+    if FPisclose(RVENodalCoord[n_RVE_nodes][1],yMax,abs_tol=Tol): # If the nodal y coordinate matches the RVE largest y coordinate
         FaceTNodes.append(n_RVE_nodes) # Store the node the front face list
 for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through all nodes in the left face list
     if FaceLNodes[n_FaceL_nodes] in FaceBNodes: # If the node is also in the bottom face list
