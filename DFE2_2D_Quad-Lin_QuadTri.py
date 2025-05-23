@@ -414,7 +414,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     
     # Call macroscale nodes into Sets
     for n_macroele_nodes in range(4): # Loop through all nodes of the macroscale element
-        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-N'+str(j+1)+', instance='+str(MacroInstName) # Create a Set for the macroscale node
+        print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', instance='+str(MacroInstName) # Create a Set for the macroscale node
         print>>Sets,str(NodalConnect[n_macro_eles][n_macroele_nodes]+1) # Node number of the macroscale node
 
     # For each macroscale integration point
