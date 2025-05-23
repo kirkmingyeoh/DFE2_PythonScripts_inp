@@ -322,7 +322,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     for n_macroele_GPs in range(len(GP)): # Loop through all integration points of the macroscale element
         [tsi,eta] = GP[n_macroele_GPs] # Natural coordinates of the current integration point
         J = np.array([[a1+a3*eta,b1+b3*eta],[a2+a3*tsi,b2+b3*tsi]]) # Jacobian matrix of the current integration point
-        J_RVE = abs(Weight*np.linalg.det(J)/(B_RVE*H_RVE)) # Scaling factor for RVE volume (to be applied as Section thickness) at the current integration point
+        J_RVE = (Weight*abs(Weight*np.linalg.det(J))/(B_RVE*H_RVE)) # Scaling factor for RVE volume (to be applied as Section thickness) at the current integration point
         
         [N1,N2,N3,N4] = Bilin_Interpolation(tsi,eta) # Shape function values corresponding to the current integration point
         RVE_X = N1*NodalCoordX[n_macro_eles][0] + N2*NodalCoordX[n_macro_eles][1] + N3*NodalCoordX[n_macro_eles][2] + N4*NodalCoordX[n_macro_eles][3] # x coordinate of the current integration point
