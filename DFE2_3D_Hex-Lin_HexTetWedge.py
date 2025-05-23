@@ -16,14 +16,16 @@ execfile('DFE2_0_UserInput.py')
 
 # Defining the macroscale integration points for full integration if not specified
 if GP == '':
-    GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]]
+    GP = [[-3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5,-3**-0.5],[3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,3**-0.5,-3**-0.5],[-3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,-3**-0.5,3**-0.5],[3**-0.5,3**-0.5,3**-0.5],[-3**-0.5,3**-0.5,3**-0.5]]
 
 # Defining the Gaussian weights based on the integration points
 if len(GP) == 1:
-    Weight = 4.0
+    Weight = 8.0
 elif len(GP) == 2:
-    Weight = 2.0
+    Weight = 4.0
 elif len(GP) == 4:
+    Weight = 2.0
+elif len(GP) == 8:
     Weight = 1.0
 
 # Defining the tolerance if not specified
@@ -451,7 +453,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
                 [a2+a4*tsi+a6*zeta+a7*tsi*zeta,b2+b4*tsi+b6*zeta+b7*tsi*zeta,d2+d4*tsi+d6*zeta+d7*tsi*zeta],
                 [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]]) # Jacobian matrix of the current integration point
        
-        J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
+        J_RVE = (Weight*abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
         
         if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so 
             Ind_SF = SF.index(round(J_RVE,5)) # Index of the first instance of this volume scaling factor
@@ -609,7 +611,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
                 [a2+a4*tsi+a6*zeta+a7*tsi*zeta,b2+b4*tsi+b6*zeta+b7*tsi*zeta,d2+d4*tsi+d6*zeta+d7*tsi*zeta],
                 [a3+a5*tsi+a6*eta+a7*tsi*eta,b3+b5*tsi+b6*eta+b7*tsi*eta,d3+d5*tsi+d6*eta+d7*tsi*eta]]) # Jacobian matrix of the current integration point
         J_inv = np.linalg.inv(J) # Inverse of the Jacobian matrix of the current integration point
-        J_RVE = (abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE)))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
+        J_RVE = (Weight*abs(np.linalg.det(J)/(B_RVE*H_RVE*T_RVE))**(1.0/3.0) # Scaling factor for RVE volume at the current integration point
 
         # Shape function values at the current macroscale integration point
         Shape_fn = Trilin_Interpolation(tsi,eta,zeta)
