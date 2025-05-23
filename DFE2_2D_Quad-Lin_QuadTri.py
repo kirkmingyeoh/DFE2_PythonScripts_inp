@@ -5,21 +5,30 @@ Created on Fri Jul 14 15:07:06 2023
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
 """
 
+### Importing required libraries
 import os
 import numpy as np
 import math
 
-### Update the following parameters
-os.chdir('E:\\Kirk Ming Abaqus\\DFE2_Demo') # directory where input files are, use double '\'
-MacroInpName = 'Demo_2D_Macro.inp' # Name of macroscale input file
-RVEInpName = 'Demo_2D_Micro.inp' # Name of RVE input file Demo_2D_RVE
-NewInpName = 'DFE2_2D.inp' # Name of new Direct FE2 input file
+### Obtain the user-defined inputs
+# Read the user-defined inputs
+execfile('DFE2_0_UserInput.py')
 
-'''
-No further user input is required
-'''
+# Defining the macroscale integration points for full integration if not specified
+if GP == '':
+    GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]]
 
-GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]]
+# Defining the Gaussian weights based on the integration points
+if len(GP) == 1:
+    Weight = 4.0
+elif len(GP) == 2:
+    Weight = 2.0
+elif len(GP) == 4:
+    Weight = 1.0
+
+# Defining the tolerance if not specified
+if Tol == '':
+    Tol = 1e-6
 
 ### Define functions
 # Search inp list for a particular part's elements and nodes
@@ -215,7 +224,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     for n_macroele_nodes in range(len(MacroNodalConnect[n_macro_eles])): # Loop through all nodes of the current macroscale element
         X1 = X[n_macroele_nodes]-X0 # Difference in x coordinate
         Y1 = Y[n_macroele_nodes]-Y0 # Difference in y coordinate
-        if X1 == 0.0: # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
+        if math.isclose(X1,0.0,abs_tol=Tol): # If the node of interest sits directly above/below the centroid, e.g., the macroscale element is rotated 45 deg
             if Y1>0: # If the node is above the centroid
                 theta = 0.5*(math.pi)
             else: # If the node is below the centroid
@@ -263,13 +272,13 @@ del RVE_ListY # Remove the temporary list
 # Sorting the RVE boundary nodes
 FaceLNodes,FaceRNodes,FaceBNodes,FaceTNodes = [],[],[],[] # List to store the nodes on the RVE boundaries
 for n_RVE_nodes in range(len(RVENodalCoord)): # Loop through all RVE nodes
-    if RVENodalCoord[n_RVE_nodes][0] == xMin: # If the nodal x coordinate matches the RVE smallest x coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMin,abs_tol=Tol): # If the nodal x coordinate matches the RVE smallest x coordinate
         FaceLNodes.append(n_RVE_nodes) # Store the node the left face list
-    if RVENodalCoord[n_RVE_nodes][0] == xMax: # If the nodal x coordinate matches the RVE largest x coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][0],xMax,abs_tol=Tol): # If the nodal x coordinate matches the RVE largest x coordinate
         FaceRNodes.append(n_RVE_nodes) # Store the node the right face list
-    if RVENodalCoord[n_RVE_nodes][1] == yMin: # If the nodal y coordinate matches the RVE smallest y coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMin,abs_tol=Tol): # If the nodal y coordinate matches the RVE smallest y coordinate
         FaceBNodes.append(n_RVE_nodes) # Store the node the bottom face list
-    if RVENodalCoord[n_RVE_nodes][1] == yMax: # If the nodal y coordinate matches the RVE largest y coordinate
+    if math.isclose(RVENodalCoord[n_RVE_nodes][1],yMax,abs_tol=Tol): # If the nodal y coordinate matches the RVE largest y coordinate
         FaceTNodes.append(n_RVE_nodes) # Store the node the front face list
 for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through all nodes in the left face list
     if FaceLNodes[n_FaceL_nodes] in FaceBNodes: # If the node is also in the bottom face list
@@ -313,13 +322,13 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
     for n_macroele_GPs in range(len(GP)): # Loop through all integration points of the macroscale element
         [tsi,eta] = GP[n_macroele_GPs] # Natural coordinates of the current integration point
         J = np.array([[a1+a3*eta,b1+b3*eta],[a2+a3*tsi,b2+b3*tsi]]) # Jacobian matrix of the current integration point
-        J_RVE = abs(np.linalg.det(J)/(B_RVE*H_RVE)) # Scaling factor for RVE volume (to be applied as Section thickness) at the current integration point
+        J_RVE = abs(Weight*np.linalg.det(J)/(B_RVE*H_RVE)) # Scaling factor for RVE volume (to be applied as Section thickness) at the current integration point
         
         [N1,N2,N3,N4] = Bilin_Interpolation(tsi,eta) # Shape function values corresponding to the current integration point
         RVE_X = N1*NodalCoordX[n_macro_eles][0] + N2*NodalCoordX[n_macro_eles][1] + N3*NodalCoordX[n_macro_eles][2] + N4*NodalCoordX[n_macro_eles][3] # x coordinate of the current integration point
         RVE_Y = N1*NodalCoordY[n_macro_eles][0] + N2*NodalCoordY[n_macro_eles][1] + N3*NodalCoordY[n_macro_eles][2] + N4*NodalCoordY[n_macro_eles][3] # y coordinate of the current integration point
-        
-        if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so == here replace with isclose
+
+        if round(J_RVE,5) in SF: # Check if this volume scaling factor has been used before, reuse the same RVE Part if so
             Ind_SF = SF.index(round(J_RVE,5)) # Index of the first instance of this volume scaling factor
         else: # Create a new RVE with this current volume scaling factor if it has not been used before
             Ind_SF = len(SF) # Index the new volume scaling factor as the next term in the list
@@ -659,13 +668,17 @@ Replaced one letter, non-descriptive variables with more explanatory variable na
 Added additional comments to most lines to explain their functoions
 Renamed the file to clarify that it is meant for linear quadrilateral macroscale elements
 
+Replaced all == floating point comparisons wth isclose() functions
+More portable and flexible comparison for floating point numbers
 
+Added the cases where isclose(X1,0.0) when sorting the macroscale ndoes
+Accounts for the cases where the node of interest is located directly above or below the centroid, where atan cannot be uesd
 
+Revised the user-defined input section to read another Python script
+Prevents users from modifying this current script unless necessary
 
-Replace == with isclose
-Gaussian weight component
-Account for X1=0 cases when sorting for the macroscale element connectivity
-Separate user input structure
+Revised the GP and Gaussian weight section
+Allows for more flexibility to use reduced integration if desired
 
 End of 250519 Revision
 
