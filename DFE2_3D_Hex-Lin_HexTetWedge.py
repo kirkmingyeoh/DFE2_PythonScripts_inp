@@ -555,8 +555,8 @@ for n_FaceL_nodes in range(len(FaceLNodes)): # Loop through the left face nodes
     # Find the right face node for pairing based on the shortest in-plane distance with the current left face node
     Dist = [] # Temporary list to store in-plane distance between each right face node with the current left face node
     for n_FaceR_nodes in range(len(FaceRNodes)): # Loop through the right face nodes
-        y2 = RVENodalCoord[FaceRNodes[j]][1] # y coordinate of the right face node
-        z2 = RVENodalCoord[FaceRNodes[j]][2] # z coordinate of the right face node
+        y2 = RVENodalCoord[FaceRNodes[n_FaceR_nodes]][1] # y coordinate of the right face node
+        z2 = RVENodalCoord[FaceRNodes[n_FaceR_nodes]][2] # z coordinate of the right face node
         
         Dist.append(math.sqrt(pow(y2-y1,2)+pow(z2-z1,2))) # In-plane distance between current right face node with the current left face node
         
@@ -649,16 +649,16 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
         # Call Sets and set up the MPCs for the left and right edges of FaceBa
         for n_EdgeLR_nodepairs in range(len(EdgeLNodes)): # Loop through all left-right edge node pairs
             print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeL'+str(n_EdgeLR_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the left edge node of the pair
-            print>>Sets,str(EdgeLNodes[n_FaceLR_nodepairs]+1) # Left face node number of the pair
+            print>>Sets,str(EdgeLNodes[n_EdgeLR_nodepairs]+1) # Left face node number of the pair
             print>>Sets,'*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeR'+str(n_EdgeLR_nodepairs+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1) # Create a Set for the right edge node of the pair
-            print>>Sets,str(EdgeRNodes[n_FaceLR_nodepairs]+1) # Right edge node number of the pair
+            print>>Sets,str(EdgeRNodes[n_EdgeLR_nodepairs]+1) # Right edge node number of the pair
             
             for n_RVEnode_dofs in range(3): # Loop through all DOFs of the nodes
                 print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeLR'+str(n_EdgeLR_nodepairs+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10' # Number of terms in the Constraint
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeR'+str(k+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Right edge node DOF, also the first DOF which will be removed
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeL'+str(k+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Left edge node DOF
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeR'+str(n_EdgeLR_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Right edge node DOF, also the first DOF which will be removed
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-EdgeNodeL'+str(n_EdgeLR_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Left edge node DOF
                 for n_macroele_nodes in range(8): # Loop through all macroscale nodes
                     # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along x direction
                     print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(dx*N_GloDeriv[n_macroele_nodes][0]) # Macroscale node DOF
@@ -741,11 +741,11 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
             print>>Sets,str(PairingFacesBaF[n_FaceBaF_nodepairs][1]+1) # Front face node number of the pair
             
             for n_RVEnode_dofs in range(3): # Loop through all DOFs of the nodes
-                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-BaF'+str(k+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-BaF'+str(n_FaceBaF_nodepairs+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10' # Number of terms in the Constraint
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeF'+str(k+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Front face node DOF, also the first DOF which will be removed
-                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeBa'+str(k+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Back face node DOF
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeF'+str(n_FaceBaF_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Front face node DOF, also the first DOF which will be removed
+                print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-FaceNodeBa'+str(n_FaceBaF_nodepairs+1)+', '+str(n_RVEnode_dofs+1)+', 1.0' # Back face node DOF
                 for n_macroele_nodes in range(8): # Loop through all macroscale nodes
                     # Coefficient of the macroscale node term obtained by multiplying RVE dimension and macroscale shape function gradient along y direction
                     print>>Eqns,'Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_RVEnode_dofs+1)+', '+str(dy*N_GloDeriv[n_macroele_nodes][1]) # Macroscale node DOF
@@ -763,7 +763,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
 
             # Edge 1 and 2
             for n_RVEnode_dofs in range(3): # Loop through all DOFs of the nodes
-                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge12Node'+str(k+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge12Node'+str(n_edge_nodes+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10' # Number of terms in the Constraint
                 print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge2Node'+str(n_edge_nodes+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Edge 2 node DOF, also the first DOF which will be removed
@@ -774,7 +774,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
 
             # Edge 2 and 3
             for n_RVEnode_dofs in range(3): # Loop through all DOFs of the nodes
-                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge23Node'+str(k+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge23Node'+str(n_edge_nodes+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10' # Number of terms in the Constraint
                 print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge3Node'+str(n_edge_nodes+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Edge 3 node DOF, also the first DOF which will be removed
@@ -785,7 +785,7 @@ for n_macro_eles in range(N_macro_eles): # Loop through all macroscale elements
 
             # Edge 1 and 4
             for n_RVEnode_dofs in range(3): # Loop through all DOFs of the nodes
-                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge14Node'+str(k+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
+                print>>Eqns,'** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge14Node'+str(n_edge_nodes+1)+'-DOF'+str(n_RVEnode_dofs+1) # Create an Equation type Constraint for the DOF
                 print>>Eqns,'*Equation'
                 print>>Eqns,'10' # Number of terms in the Constraint
                 print>>Eqns,'Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-Edge4Node'+str(n_edge_nodes+1)+', '+str(n_RVEnode_dofs+1)+', -1.0' # Edge 4 node DOF, also the first DOF which will be removed
