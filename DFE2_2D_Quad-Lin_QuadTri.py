@@ -669,7 +669,7 @@ When reading RVE Material definitions, previous code will miss the last line of 
 
 End of 240916 Revision
 
-250519 Revision (WIP)
+250519 Revision
 Revisions for improved clarity:
 Replaced one letter, non-descriptive variables with more explanatory variable names
 Added additional comments to most lines to explain their functoions
