@@ -5,6 +5,8 @@ Created on Mon May 19 14:00:01 2025
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
 """
 
+### This is the user input file to specify user-defined inputs ###
+
 ### Input file names
 MacroInpName = 'Demo_2D_Macro.inp' # Name of macroscale input file
 RVEInpName = 'Demo_2D_RVE.inp' # Name of RVE input file Demo_2D_RVE
