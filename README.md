@@ -23,7 +23,7 @@ Python scripts
 -----
 The following are the Python scripts presented in this repository. 
 
-0) **DFE2_0_UserInput.py** - This input script is for users to specify the user-defined inputs, such as the names of the macroscale, microscale RVE and output Direct FE2 input file names. Users can also specify additional information such as the number of integration points per macroscale element, as well as tolerance for floating point comparisons. This input script will be called by the other scripts to read the user-defined inputs. 
+0) **DFE2_0_UserInput.py** - This user input script is to specify the user-defined inputs, such as the names of the macroscale, microscale RVE and output Direct FE2 input files. Users can also specify additional information such as the number of integration points per macroscale element, as well as tolerance for floating point comparisons. This input script will be called by the other scripts to read the user-defined inputs. 
 
 1) **DFE2_2D_Quad-Lin_QuadTri.py** - This script sets up a Direct FE2 input file for problems involving linear 2D quadrilateral elements (CPS4 or CPS4R) with a 2x2 integration scheme at the macroscale, and any 2D continuum elements at the microscale. 
 
