@@ -966,7 +966,7 @@ Revision log
 Replaced 'remove' function with 'del' function
 'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended 
 
-250519 Revision (WIP)
+250519 Revision
 Revisions for improved clarity:
 Replaced one letter, non-descriptive variables with more explanatory variable names
 Added additional comments to most lines to explain their functoions
