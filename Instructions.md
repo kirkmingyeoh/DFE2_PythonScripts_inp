@@ -35,15 +35,15 @@ If using Abaqus CAE:
 2) Execute the main Python script through 'File' > 'Run Script' and select the main Python script.
 
 If using other Python IDEs, including Abaqus CAE nogui:
-1) Change the working directory to the folder/directory where the files are residing using the following commands.
-   '''
-   import os
-   os.chdir('path\to\directory')
-   '''
-2) Execute the main Python script using the following command.
-   '''
-   execfile('name_of_main_Python_script')
-   '''
+1) Change the working directory to the folder/directory where the files are residing using the following commands.   
+   '''   
+   import os   
+   os.chdir('path\to\directory')   
+   '''   
+2) Execute the main Python script using the following command.   
+   '''   
+   execfile('name_of_main_Python_script')   
+   '''   
 
 -----
 Abaqus input file returned by the Python script
