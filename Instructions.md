@@ -13,7 +13,7 @@ Two Abaqus input files need to be provided by the user - one each to describe th
 
 Note that additional instructions or preparations might be needed for advanced or customised scripts, and should be detailed within the respective scripts. 
 
-These user-provided Abaqus input files, the user input file (DFE2_0_UserInput.py) as well as the main Python script should then be placed in a folder/directory. 
+These two user-provided Abaqus input files, the user input file (DFE2_0_UserInput.py) as well as the main Python script should then be placed in a folder/directory. 
 
 -----
 User-provided information to the Python script
