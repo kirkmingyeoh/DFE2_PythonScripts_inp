@@ -1,6 +1,6 @@
 # Instructions 
 
-This document details the general instructions to run the Python scripts in this repository to generate Direct FE2 input files for Abaqus. These are general instructions which are applicable across all scripts. Specific instructions unique to certain scripts should be detailed within the respective scripts. 
+This document details the general instructions to run the Python scripts in this repository to generate Direct FE2 input files for Abaqus. These are general instructions which are applicable across all scripts. Specific instructions unique to particular scripts should be detailed within the respective scripts. 
 
 -----
 User-provided Abaqus input files
@@ -13,23 +13,44 @@ Two Abaqus input files need to be provided by the user - one each to describe th
 
 Note that additional instructions or preparations might be needed for advanced or customised scripts, and should be detailed within the respective scripts. 
 
-----
+These user-provided Abaqus input files, the user input script as well as the main Python script should then be placed in a folder/directory. 
+
+-----
 User-provided information to the Python script
 -----
-Once the user-provided Abaqus input files are generated, the following information needs to be updated in the Python scripts:
-1) The working directory or folder where the user-provided input files are contained
-2) Name of the macroscale input file
-3) Name of the microscale input file
-4) Intended name for the Direct FE2 input file that the script will generate
+Once the user-provided input files are generated and placed in a folder/directory, the following information needs to be updated in the user input script:
+1) Name of the macroscale input file
+2) Name of the microscale input file
+3) Intended name for the Direct FE2 input file that the script will generate
 
-Note that additional information may be required for advanced or customised scripts, and should be detailed within the respective scripts.
+Users may also specify additional information such as the number of integration points per macroscale element as well as tolerance for floating point comparisons. Some of these additional information may be required for advanced or customised scripts, and should be detailed within the respective scripts.
 
-Once the user-provided information has been updated, the user needs to run the Python script. Note that the script is written in Python 2.7, which can either be run with Abaqus' in-built Python compiler (either through CAE or CAE nogui, in 2024 or earlier versions) or with a compatible Python IDE. 
+-----
+Executing the Python script
+-----
+Once the user-defined inputs have been specified in the user input script, the main Python script can then be executed. Note that the script is written in Python 2.7, which can either be run with Abaqus' in-built Python compiler (either through CAE or CAE nogui, in 2024 or earlier versions) or with a compatible Python IDE. 
+
+If using Abaqus CAE:
+1) Change the working directory to the folder/directory where the files are residing through 'File' > 'Set Work Directory' and select the folder/directory.
+2) Execute the main Python script through 'File' > 'Run Script' and select the main Python script.
+
+If using other Python IDEs, including Abaqus CAE nogui:
+1) Change the working directory to the folder/directory where the files are residing using the following commands.
+   '''
+   import os
+   os.chdir('path\to\directory')
+   '''
+2) Execute the main Python script using the following command.
+   '''
+   execfile('name_of_main_Python_script')
+   '''
 
 -----
 Abaqus input file returned by the Python script
 -----
-The Python script will return a correspondingly named Direct FE2 input file to the same working directory. Microscale RVEs have been placed at the Gauss points of the macroscale mesh and multi-point constraints to link the degrees of freedom of both scales have been included. This input file can then be directly submitted as a job to Abaqus. 
+The Python script will return a correspondingly named Direct FE2 input file to the same working directory. Volume-scaled microscale RVEs have been placed at the integration points of the macroscale mesh and multi-point constraints to link the degrees of freedom of both scales have been included. This input file can then be directly submitted as a job to Abaqus. 
+
+The results returned by Abaqus can be directly visualized in Abaqus CAE's Visualization module without any additional post-processing. 
 
 -----
 Validating the Direct FE2 multiscale model
