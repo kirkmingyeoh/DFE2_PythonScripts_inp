@@ -3,6 +3,10 @@
 Created on Mon May 19 14:00:01 2025
 
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
+
+This user input file is to specify the user-defined inputs, such as the names of the macroscale, microscale RVE and output Direct FE2 input files.
+Users can also specify additional information such as the number of integration points per macroscale element, as well as tolerance for floating point comparisons.
+This input file is used with and will be called by the other Python scripts to read the user-defined inputs.
 """
 
 ### Input file names
