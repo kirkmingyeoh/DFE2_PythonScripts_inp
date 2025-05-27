@@ -3,6 +3,8 @@
 Created on Fri Jul 14 15:07:06 2023
 
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
+
+This script sets up a Direct FE2 input file for problems involving linear 2D quadrilateral elements (CPS4/CPS4R/CPE4/CPE4R) at the macroscale, and any 2D continuum elements at the microscale.
 """
 
 ### Importing required libraries
