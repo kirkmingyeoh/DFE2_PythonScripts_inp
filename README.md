@@ -40,7 +40,7 @@ Three examples are presented in this repository.
    
 2) **Demo_3D_Hex-Lin_Hex_Lin.zip** - This is a 3D example which uses linear hexahedral elements (C3D8) at both scales. 
 
-3) **Demon_2D_Homogeneous_Validation** - This is a 2D homogeneous example using linear quadrilateral elements (CPS4) which demonstrates a validation case for Direct FE2. 
+3) **Demo_2D_Homogeneous_Validation** - This is a 2D homogeneous example using linear quadrilateral elements (CPS4) which demonstrates a validation case for Direct FE2. 
 
 Examples 1) and 2) are demonstrative examples to show how the Python scripts presented in this repository work, one each for 2D and 3D linear continuum macroscale elements. They each contain the user-provided macroscale and microscale input files, the scripts required, the resulting Direct FE2 input files returned by the Python script, as well as a list briefly describing each file within. 
 
