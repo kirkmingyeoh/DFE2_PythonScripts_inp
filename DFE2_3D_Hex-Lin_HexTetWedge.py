@@ -3,6 +3,8 @@
 Created on Sun Jul 16 14:40:46 2023
 
 @author: Kirk Ming Yeoh (e0546208@u.nus.edu)
+
+This script sets up a Direct FE2 input file for problems involving linear 3D hexahedral elements (C3D8/C3D8R) at the macroscale, and any 3D continuum elements at the microscale.
 """
 
 ### Importing required libraries
