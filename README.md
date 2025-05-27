@@ -25,9 +25,9 @@ The following are the Python scripts presented in this repository.
 
 0) **DFE2_0_UserInput.py** - This user input file is to specify the user-defined inputs, such as the names of the macroscale, microscale RVE and output Direct FE2 input files. Users can also specify additional information such as the number of integration points per macroscale element, as well as tolerance for floating point comparisons. This input file is used with and will be called by the other Python scripts to read the user-defined inputs. 
 
-1) **DFE2_2D_Quad-Lin_QuadTri.py** - This script sets up a Direct FE2 input file for problems involving linear 2D quadrilateral elements (CPS4, CPS4R, CPE4, CPE4R) at the macroscale, and any 2D continuum elements at the microscale. 
+1) **DFE2_2D_Quad-Lin_QuadTri.py** - This script sets up a Direct FE2 input file for problems involving linear 2D quadrilateral elements (CPS4/CPS4R/CPE4/CPE4R) at the macroscale, and any 2D continuum elements at the microscale. 
 
-2) **DFE2_3D_Hex-Lin_HexTetWedge.py** - This script sets up a Direct FE2 input file for problems involving linear 3D hexahedral elements (C3D8 or C3D8R) at the macroscale, and any 3D continuum elements at the microscale.
+2) **DFE2_3D_Hex-Lin_HexTetWedge.py** - This script sets up a Direct FE2 input file for problems involving linear 3D hexahedral elements (C3D8/C3D8R) at the macroscale, and any 3D continuum elements at the microscale.
 
 It is noted that the type of macroscale element specified in the macroscale input file, whether with reduced or full integration, does not affect the final results. This is because Direct FE2 only utilises the degrees of freedom of the macroscale element's nodes, and not the macroscale element's integration points. 
 
