@@ -29,7 +29,7 @@ The following are the Python scripts presented in this repository.
 
 2) **DFE2_3D_Hex-Lin_HexTetWedge.py** - This script sets up a Direct FE2 input file for problems involving linear 3D hexahedral elements (C3D8/C3D8R) at the macroscale, and any 3D continuum elements at the microscale.
 
-It is noted that the type of macroscale element specified in the macroscale input file, whether with reduced or full integration, does not affect the final results. This is because Direct FE2 only utilises the degrees of freedom of the macroscale element's nodes, and not the macroscale element's integration points. 
+It is noted that the type of macroscale element specified in the user-defined macroscale input file, whether with reduced or full integration, does not affect the final results. This is because Direct FE2 only utilises the degrees of freedom of the macroscale element's nodes, and not the macroscale element's integration points. 
 
 -----
 Examples
