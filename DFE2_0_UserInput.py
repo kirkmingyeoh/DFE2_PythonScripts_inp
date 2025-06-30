@@ -17,20 +17,22 @@ NewInpName = 'DFE2_2D.inp' # Name of new Direct FE2 input file
 
 ### Additional information
 GP = ''
-'''
-- Specify the GPs as a list in terms of natural coordinates of the macroscale element (optional)
-- E.g., GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]] for 2D quadrilateral elements with full integration
-- E.g., GP = [[0.0,0.0]] for 2D quadrilateral elements with fuly reduced integration
-- Leave as '' if not intending to specify, where full integration will be used 
-'''
-
 Tol = 1e-6
-'''
-- Specify the tolerance when performing floating point comparisons (optional)
-- Leave as default of 1e-6 or '' if not intending to specify
-'''
+Sort = ''
 
+'''
+Revision log
 
+250526 Original release
+
+250630 Revision
+Moved all explanatory notes to another document for conciseness 
+Added Sort as new input for users to define the order to sort the macroscale nodes
+
+End of 250630 Revision
+
+End of Revision
+'''
 
 
 
