@@ -194,7 +194,9 @@ Revision log
 
 240916 Revision
 Replaced 'remove' function with 'del' function
-'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended 
+'remove' function searches and deletes the first match, while 'del' function deletes the specific line as intended
+
+End of 240916 Revision
 
 250519 Revision
 Revisions for improved clarity:
@@ -213,8 +215,6 @@ Allows for more flexibility to use reduced integration if desired
 
 End of 250519 Revision
 
-End of Revision
-
 250630 Revision
 ** Major revision - modularisation
 All major functions are now modularised and shared across scripts, accounting for variations
@@ -224,6 +224,8 @@ Minor revisions
 Relabel J as J^T for better clarity
 Merged the RVE and MPC loops
 Replaced print>> function with write() for cross-compatibility across different versions of Python
+
+End of 250630 Revision
 
 End of Revision
 
