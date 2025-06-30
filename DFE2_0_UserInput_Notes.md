@@ -1,3 +1,5 @@
+# DFE2_0_UserInput_Notes
+
 GP
 - Specify the GPs as a list in terms of natural coordinates of the macroscale element (optional)
 - E.g., GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]] for 2D quadrilateral elements with full integration
