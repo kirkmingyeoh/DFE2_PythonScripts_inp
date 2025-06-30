@@ -1,0 +1,13 @@
+GP
+- Specify the GPs as a list in terms of natural coordinates of the macroscale element (optional)
+- E.g., GP = [[-3**-0.5,-3**-0.5],[3**-0.5,-3**-0.5],[3**-0.5,3**-0.5],[-3**-0.5,3**-0.5]] for 2D quadrilateral elements with full integration
+- E.g., GP = [[0.0,0.0]] for 2D quadrilateral elements with fuly reduced integration
+- Leave as '' if not intending to specify, where full integration will be used
+
+Tol 
+- Specify the tolerance when performing floating point comparisons (optional)
+- Leave as default of 1e-6 or '' if not intending to specify
+
+Sort
+- Specify how the macroscale nodes are sorted
+- Leave as '' for default, or 'global' or 'user'
