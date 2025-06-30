@@ -11,7 +11,7 @@ This input file is used with and will be called by the other Python scripts to r
 
 ### Input file names
 MacroInpName = 'Demo_2D_Macro.inp' # Name of macroscale input file
-RVEInpName = 'Demo_2D_RVE.inp' # Name of RVE input file Demo_2D_RVE
+RVEInpName = 'Demo_2D_RVE.inp' # Name of RVE input file 
 NewInpName = 'DFE2_2D.inp' # Name of new Direct FE2 input file
 
 
