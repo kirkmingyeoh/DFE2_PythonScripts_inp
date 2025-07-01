@@ -96,8 +96,8 @@ FaceRNodes = SortListofNodes2D(ExcludeNodes(FaceRNodes,[],[RVENodalCoord[V3][1],
 PairingFacesLR = PairFaceNodes(FaceLNodes,FaceRNodes,1,2,RVENodalCoord)
 
 # Bottom and top faces
-FaceBNodes = SortListofNodes2D(ExcludeNodes(FaceBNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[],RVENodalCoord,RVE_Dim),0,1,RVENodalCoord) # Sort the bottom face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
-FaceTNodes = SortListofNodes2D(ExcludeNodes(FaceTNodes,[RVENodalCoord[V3][0],RVENodalCoord[V8][0]],[RVENodalCoord[V3][1],RVENodalCoord[V8][1]],[],RVENodalCoord,RVE_Dim),0,1,RVENodalCoord) # Sort the top face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
+FaceBNodes = SortListofNodes2D(ExcludeNodes(FaceBNodes,[RVENodalCoord[V2][0],RVENodalCoord[V8][0]],[RVENodalCoord[V2][1],RVENodalCoord[V8][1]],[],RVENodalCoord,RVE_Dim),0,1,RVENodalCoord) # Sort the bottom face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
+FaceTNodes = SortListofNodes2D(ExcludeNodes(FaceTNodes,[RVENodalCoord[V2][0],RVENodalCoord[V8][0]],[RVENodalCoord[V2][1],RVENodalCoord[V8][1]],[],RVENodalCoord,RVE_Dim),0,1,RVENodalCoord) # Sort the top face nodes based on their x and y coordinates, excluding nodes on the edges using the x and y coordinates of V3 and V8
 PairingFacesBT = PairFaceNodes(FaceBNodes,FaceTNodes,0,1,RVENodalCoord)
 
 # Front and back faces
