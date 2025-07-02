@@ -574,65 +574,67 @@ def ShapeFnDeriv(MacroEle_Type,tsi,eta,zeta,J_T_inv):
 
 # Call and write Sets for RVE nodes pairs
 def RVENodeSet(NodeGroupList,Sets,n_macro_eles,n_macroele_GPs,NodeGroup_Label):
-    for n_nodegroups in range(len(NodeGroupList)):
-        # Call Sets for the master node of the group
-        Sets.write('*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodeGroup_Label[0])+str(NodeGroup_Label[1])+'Node'+str(n_nodegroups+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'\n')
-        Sets.write(str(NodeGroupList[n_nodegroups][0]+1)+'\n')
+    for n_nodegroups in range(len(NodeGroupList)): # Loop through all node groups in the list
+        # Call Set for the master node of the group, which is the first node in the group
+        Sets.write('*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodeGroup_Label[0])+str(NodeGroup_Label[1])+'Node'+str(n_nodegroups+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'\n') # Name of the Set for the master node
+        Sets.write(str(NodeGroupList[n_nodegroups][0]+1)+'\n') # Master node number
         
-        # Call Sets for the slave node of each pair
-        for n_nodepair_terms in range(len(NodeGroupList[n_nodegroups])-1):
-            Sets.write('*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodeGroup_Label[0])+str(NodeGroup_Label[n_nodepair_terms+2])+'Node'+str(n_nodegroups+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'\n')
-            Sets.write(str(NodeGroupList[n_nodegroups][n_nodepair_terms+1]+1)+'\n')
+        # Call Sets for the slave nodes of each pair
+        for n_nodepair_terms in range(len(NodeGroupList[n_nodegroups])-1): # Loop through all other nodes within the node group
+            Sets.write('*Nset, nset=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodeGroup_Label[0])+str(NodeGroup_Label[n_nodepair_terms+2])+'Node'+str(n_nodegroups+1)+', instance=Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'\n') # Name of the Set for the slave node
+            Sets.write(str(NodeGroupList[n_nodegroups][n_nodepair_terms+1]+1)+'\n') # Slave node number
 
 # Calculate the rotated (if any) and scaled (if any) distances for the node pair
 def NodePairDist(Rot,Ori_Dist_Vect,J_RVE):
-    if Rot == '':
+    if Rot == '': # If there are no rotations
         Dist_Vect = np.array(Ori_Dist_Vect)*J_RVE # Scaled distance vector for the node pair
     else:
         Dist_Vect = np.dot(Rot,np.array(Ori_Dist_Vect))*J_RVE # Rotated and scaled distance vector for the node pair  
-    return Dist_Vect    
+    return Dist_Vect # Return the rotated (if any) and scaled (if any) distance vector for the node pair
 
 # Calculate the distance between node pairs and write MPCs
 def MPC(NodeGroupList,Rot,Ori_Dist_Vect,J_RVE,NodeGroup_Label,MPC_Type,Eqns,RVE_Dim,n_macro_eles,n_macroele_GPs,N_GloDeriv,MacroEle_N):
     # Remove any volume scaling for 2D cases
-    if RVE_Dim == 2:
-        J_RVE = 1.0
+    if RVE_Dim == 2: # For 2D RVEs
+        J_RVE = 1.0 # Remove any volume scaling which will be used to calculate the distane vector between node pairs
         
-    for n_nodegroups in range(len(NodeGroupList)):
+    for n_nodegroups in range(len(NodeGroupList)): # Loop through all node groups
         # Set up PBCs for each node pair in the group
-        for n_nodepair_terms in range(len(NodeGroupList[n_nodegroups])-1):
-            Dist_Vect = NodePairDist(Rot,Ori_Dist_Vect[n_nodepair_terms],J_RVE)
-            NodePair_Label = [NodeGroup_Label[0],NodeGroup_Label[1],NodeGroup_Label[n_nodepair_terms+2]]
+        for n_nodepair_terms in range(len(NodeGroupList[n_nodegroups])-1): # Loop through all slave nodes of the group (total number of nodes -1 for the master node) 
+            Dist_Vect = NodePairDist(Rot,Ori_Dist_Vect[n_nodepair_terms],J_RVE) # Distance vector between the node pair (current slave node and master node)
+            NodePair_Label = [NodeGroup_Label[0],NodeGroup_Label[1],NodeGroup_Label[n_nodepair_terms+2]] # Node Set name and MPC name labels
             
             # Solid-solid, displacement only
             if MPC_Type == 1: 
-                for n_dofs in range(RVE_Dim):
+                for n_dofs in range(RVE_Dim): # Loop through all RVE DOFs
                     Eqns.write('** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+str(NodePair_Label[2])+str(n_nodegroups+1)+'-DOF'+str(n_dofs+1)+'\n') # Create an Equation type Constraint for the DOF
                     Eqns.write('*Equation'+'\n')
-                    Eqns.write(str(2+len(N_GloDeriv))+'\n') # Addresses both linear and quadratic macroscale nodes in 2D and 3D
-                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[2])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', -1.0'+'\n')
-                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', 1.0'+'\n')
-                    for n_macroele_nodes in range(len(N_GloDeriv)):
-                        Coeff = 0.0
-                        for n_coeff_terms in range(RVE_Dim):
+                    Eqns.write(str(2+len(N_GloDeriv))+'\n') # Total number of DOFs in the Constraint. In MPC_Type 1, two RVE nodes and all macroscale nodes are involved, each contributing 1 DOF
+                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[2])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', -1.0'+'\n') # Slave node of the Constraint
+                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', 1.0'+'\n') # Master node of the Constraint
+                    for n_macroele_nodes in range(len(N_GloDeriv)): # Loop through all macroscale nodes
+                        Coeff = 0.0 # Coefficient for the macroscale node term
+                        for n_coeff_terms in range(len(Dist_Vect)): # Loop through all components of the distance vector
+                            # Coefficient of the macroscale node term obtained by multiplying components of the distance vector with the macroscale shape function gradients along the same direction
                             Coeff += Dist_Vect[n_coeff_terms]*N_GloDeriv[n_macroele_nodes][n_coeff_terms]
                         Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n')
                         
         # Set up MPC for rigid body motion, applied on corner V1 
-        if NodeGroup_Label[0] == 'V':
-            Dist_Vect = NodePairDist(Rot,Ori_Dist_Vect[-1],J_RVE)
-            NodePair_Label = [NodeGroup_Label[0],NodeGroup_Label[1]]
+        if NodeGroup_Label[0] == 'V': # If the node group is for vertices of the RVE
+            Dist_Vect = NodePairDist(Rot,Ori_Dist_Vect[-1],J_RVE) # Distance vector between V1 and the RVE centroid
+            NodePair_Label = [NodeGroup_Label[0],NodeGroup_Label[1]] # Node Set name and MPC name labels
             
             # Solid-solid, displacement only
             if MPC_Type == 1: 
-                for n_dofs in range(RVE_Dim):
+                for n_dofs in range(RVE_Dim): # Loop through all RVE DOFs
                     Eqns.write('** Constraint: Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+str(n_nodegroups+1)+'-RigidBody'+'-DOF'+str(n_dofs+1)+'\n') # Create an Equation type Constraint for the DOF
                     Eqns.write('*Equation'+'\n')
-                    Eqns.write(str(1+len(N_GloDeriv))+'\n') # Addresses both linear and quadratic macroscale nodes in 2D and 3D
-                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', -1.0'+'\n')
-                    for n_macroele_nodes in range(len(N_GloDeriv)):
-                        Coeff = MacroEle_N[n_macroele_nodes]
-                        for n_coeff_terms in range(RVE_Dim):
+                    Eqns.write(str(1+len(N_GloDeriv))+'\n') # Total number of DOFs in the Constraint. In MPC_Type 1, one RVE nodes and all macroscale nodes are involved, each contributing 1 DOF
+                    Eqns.write('Ele'+str(n_macro_eles+1)+'-RVE'+str(n_macroele_GPs+1)+'-'+str(NodePair_Label[0])+str(NodePair_Label[1])+'Node'+str(n_nodegroups+1)+', '+str(n_dofs+1)+', -1.0'+'\n') # Slave node of the Constraint, V1
+                    for n_macroele_nodes in range(len(N_GloDeriv)): # Loop through all macroscale nodes
+                        Coeff = MacroEle_N[n_macroele_nodes] # Coefficient for the macroscale node term
+                        for n_coeff_terms in range(len(Dist_Vect)): # Loop through all components of the distance vector
+                            # Coefficient of the macroscale node term obtained by multiplying components of the distance vector with the macroscale shape function gradients along the same direction, plus shape function value at the centroid
                             Coeff += Dist_Vect[n_coeff_terms]*N_GloDeriv[n_macroele_nodes][n_coeff_terms]
                         Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n')
 
@@ -710,5 +712,9 @@ def DelTempFiles():
 Revision log
 
 250630 Original release
+
+
+Proposed Revisions (yet to be implemented)
+Update MPC to take in no. of RVE and Macro DOFs as an input for looping, to account for additional physics
 '''
 
