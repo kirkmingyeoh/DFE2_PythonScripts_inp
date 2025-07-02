@@ -617,7 +617,7 @@ def MPC(NodeGroupList,Rot,Ori_Dist_Vect,J_RVE,NodeGroup_Label,MPC_Type,Eqns,RVE_
                         for n_coeff_terms in range(len(Dist_Vect)): # Loop through all components of the distance vector
                             # Coefficient of the macroscale node term obtained by multiplying components of the distance vector with the macroscale shape function gradients along the same direction
                             Coeff += Dist_Vect[n_coeff_terms]*N_GloDeriv[n_macroele_nodes][n_coeff_terms]
-                        Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n')
+                        Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n') # Macroscale node
                         
         # Set up MPC for rigid body motion, applied on corner V1 
         if NodeGroup_Label[0] == 'V': # If the node group is for vertices of the RVE
@@ -636,39 +636,39 @@ def MPC(NodeGroupList,Rot,Ori_Dist_Vect,J_RVE,NodeGroup_Label,MPC_Type,Eqns,RVE_
                         for n_coeff_terms in range(len(Dist_Vect)): # Loop through all components of the distance vector
                             # Coefficient of the macroscale node term obtained by multiplying components of the distance vector with the macroscale shape function gradients along the same direction, plus shape function value at the centroid
                             Coeff += Dist_Vect[n_coeff_terms]*N_GloDeriv[n_macroele_nodes][n_coeff_terms]
-                        Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n')
+                        Eqns.write('Ele'+str(n_macro_eles+1)+'-N'+str(n_macroele_nodes+1)+', '+str(n_dofs+1)+', '+str(Coeff)+'\n') # Macroscale node
 
 
 ### New input file modules
 # Read lines from temporary data files and writes them to the new Direct FE2 input file
 def DattoInp(Dat,Inp):
-    f_dat = open(Dat,'r')
+    f_dat = open(Dat,'r') # Open the .dat file as f_dat
     
     # Read all lines in the .dat file and write it into the new Direct FE2 input file
-    while 1:
-        line = f_dat.readline()
+    while 1: 
+        line = f_dat.readline() # Read all lines in the .dat file
         if not line:
             break
-        Inp.write(line)
+        Inp.write(line) # Write the line into the new Direct FE2 input file
         
-    f_dat.close()
+    f_dat.close() # Close the .dat file
 
 # Write the new Direct FE2 input file    
 def WriteDFE2(NewInpName,inp1,StartConst):
-    f_inp = open(NewInpName,'w')
+    f_inp = open(NewInpName,'w') # Open a new file for the Direct FE2 input file as f_inp
     
     # Write from the header in the macroscale input file until the end of the macroscale Part
     Mark1 = inp1.index('*End Part')
-    for n_inp1_lines in range(0,Mark1+1):
-        f_inp.write(inp1[n_inp1_lines]+'\n')
+    for n_inp1_lines in range(0,Mark1+1): # Loop through all lines of the macroscale input file from the start to Mark1 (end of macroscale Part)
+        f_inp.write(inp1[n_inp1_lines]+'\n') # Write the line into the Direct FE2 input file
     
     # Write the information on the RVE Parts    
     DattoInp('RVEParts.dat',f_inp)
     
     # Write from the end of the macroscale Part in the macroscale input file until the end of the macroscale Instance
     Mark2 = inp1.index('*End Instance')
-    for n_inp1_lines in range(Mark1+1,Mark2+2):
-        f_inp.write(inp1[n_inp1_lines]+'\n')
+    for n_inp1_lines in range(Mark1+1,Mark2+2): # Loop through all lines of the macroscale input file from the Mark1 to Mark 2 (end of macroscale Instance)
+        f_inp.write(inp1[n_inp1_lines]+'\n') # Write the line into the Direct FE2 input file
     
     # Write the information on RVE Instances    
     DattoInp('Insts.dat',f_inp)
@@ -676,8 +676,8 @@ def WriteDFE2(NewInpName,inp1,StartConst):
     # Write from the end of the macroscale Instance in the macroscale input file until the end of Assembly, including any macroscale Constraints 
     if StartConst == 'a': # If there are no macroscale Constraints
         StartConst = inp1.index('*End Assembly') # Index the end of Assembly in the macroscale input file      
-    for n_inp1_lines in range(Mark2+2,StartConst):
-        f_inp.write(inp1[n_inp1_lines]+'\n')
+    for n_inp1_lines in range(Mark2+2,StartConst): # Loop through all lines of the macroscale input file from Mark2 to StartConst (start of macroscale Constraints or end of Assembly)
+        f_inp.write(inp1[n_inp1_lines]+'\n') # Write the line into the Direct FE2 input file
     
     # Write the information on Sets  
     DattoInp('Sets.dat',f_inp)
@@ -687,17 +687,17 @@ def WriteDFE2(NewInpName,inp1,StartConst):
     
     # Print from the end of Assembly in the macroscale input file until the end of Materials
     Mark3 = inp1.index('** ----------------------------------------------------------------')
-    for n_inp1_lines in range(StartConst,Mark3):
-        f_inp.write(inp1[n_inp1_lines]+'\n')
+    for n_inp1_lines in range(StartConst,Mark3): # Loop through all lines of the macroscale input file from StartConst until Mark3 (end of macroscale Materials)
+        f_inp.write(inp1[n_inp1_lines]+'\n') # Write the line into the Direct FE2 input file
         
     # Write the information on RVE Materials
     DattoInp('RVEMats.dat',f_inp)
     
     # Print from the end of Materials in the macroscale input file until the end of the file
-    for n_inp1_lines in range(Mark3,len(inp1)):
-        f_inp.write(inp1[n_inp1_lines]+'\n')
+    for n_inp1_lines in range(Mark3,len(inp1)): # Loop through all lines of the macroscale input file from Mark3 until the end of the file 
+        f_inp.write(inp1[n_inp1_lines]+'\n') # Write the line into the Direct FE2 input file
         
-    f_inp.close()
+    f_inp.close() # Close the Direct FE2 input file
     
 # Delete the temporary files
 def DelTempFiles():
@@ -715,6 +715,10 @@ Revision log
 
 
 Proposed Revisions (yet to be implemented)
+Update SortMacroNodes with 'global' and 'user' options
 Update MPC to take in no. of RVE and Macro DOFs as an input for looping, to account for additional physics
+Update RVEPartInst to optionally include the rotation transformation for the RVE Instances
+Update DelTempFiles to check for the presence of the files before deleting, to account for the possibility that some files are added/removed for certain uses
+- Maybe pass in a list of files to be looped?
 '''
 
