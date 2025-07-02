@@ -126,7 +126,7 @@ for n_macro_eles in range(len(MacroNodalConnect)): # Loop through all macroscale
         # Call Sets and set up MPCs for vertices
         NodeGroupList_V1V2V3V4 = [[V1,V2,V3,V4]]
         NodeGroup_Label_V1V2V3V4 = ['V','1','2','3','4']
-        Ori_Dist_Vects_V1V2V3V4 = [[B_RVE,0.0],[B_RVE,H_RVE],[0.0,H_RVE]]
+        Ori_Dist_Vects_V1V2V3V4 = [[B_RVE,0.0],[B_RVE,H_RVE],[0.0,H_RVE],[-0.5*B_RVE,-0.5*H_RVE]]
         RVENodeSet(NodeGroupList_V1V2V3V4,Sets,n_macro_eles,n_macroele_GPs,NodeGroup_Label_V1V2V3V4)
         MPC(NodeGroupList_V1V2V3V4,'',Ori_Dist_Vects_V1V2V3V4,J_RVE,NodeGroup_Label_V1V2V3V4,1,Eqns,RVE_Dim,n_macro_eles,n_macroele_GPs,N_GloDeriv,MacroEle_N)
 
