@@ -1,4 +1,4 @@
-# DFE2_0_UserInput_Notes
+# UserInput_Notes
 
 This document provides explanatory notes for the user-specified inputs to be provided in DFE2_0_UserInput.py
 
