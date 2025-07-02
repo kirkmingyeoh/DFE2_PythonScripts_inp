@@ -51,7 +51,7 @@ The Python scripts presented in this repository are detailed below:
 
 1) DFE2_0_UserInput.py - User input file to specify user-defined inputs. To be used with and wil be called by all other Python scripts.  
 2) DFE2_0_Modules.py - Contains all the modules which will be called by the main scripts as listed below to set up the Direct FE2 input files.  
-3) Main scripts - Reads the two user-provided Abaqus input files, calls the necessary modules and performs the necessary calculations to set up the Direct FE2 model, and writes the final Direct FE2 input file. The scripts are generally named in the format 'DFE2_Dimension_MacroEle-FurtherInfo_RVEEle-FurtherInfo_FurtherModelInfo.py'.
+3) Main Python scripts - Reads the two user-provided Abaqus input files, calls the necessary modules and performs the necessary calculations to set up the Direct FE2 model, and writes the final Direct FE2 input file. The scripts are generally named in the format 'DFE2_Dimension_MacroEle-FurtherInfo_RVEEle-FurtherInfo_FurtherModelInfo.py'.
 
 | Name | Dimension | Macro element | RVE element | Additional details |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
