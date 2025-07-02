@@ -13,7 +13,7 @@ Two Abaqus input files need to be provided by the user - one each to describe th
 
 Note that additional instructions or preparations might be needed for advanced or customised scripts, and should be detailed within the respective scripts. 
 
-These two user-provided Abaqus input files, the user input file (DFE2_0_UserInput.py) as well as the main Python script should then be placed in a folder/directory. 
+These two user-provided Abaqus input files, the user input file (DFE2_0_UserInput.py), the modules file (DFE2_0_Modules.py) as well as the main Python script should then be placed in a folder/directory. 
 
 -----
 User-provided information to the Python script
@@ -23,12 +23,12 @@ Once the relevant files are placed in a folder/directory, the following informat
 2) Name of the microscale input file
 3) Intended name for the Direct FE2 input file that the script will generate
 
-Users may also specify additional information such as the number of integration points per macroscale element as well as tolerance for floating point comparisons. Some of these additional information may be required for advanced or customised scripts, and should be detailed within the respective scripts.
+Users may also specify additional information such as the number of integration points per macroscale element as well as tolerance for floating point comparisons. Some of these additional information may be required for advanced or customised scripts, and should be detailed within the respective scripts. Further information on these user inputs can be found in UserInput_Notes.md. 
 
 -----
 Executing the Python script
 -----
-Once the user-defined inputs have been specified in the user input file, the main Python script can then be executed. Note that the script is written in Python 2.7, which can either be run with Abaqus' in-built Python compiler (either through CAE or CAE nogui, in 2024 or earlier versions) or with a compatible Python IDE. 
+Once the user-defined inputs have been specified in the user input file, the main Python script can then be executed. The script an either be run with Abaqus' in-built Python compiler (either through CAE or CAE nogui) or with a compatible Python IDE. 
 
 If using Abaqus CAE:
 1) Change the working directory to the folder/directory where the files are residing through 'File' > 'Set Work Directory' and select the folder/directory.
