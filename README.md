@@ -16,6 +16,8 @@ This repository contains the following files and folder:
 
 (4) Refences.md - A list of Direct FE2 references.
 
+(5) UserInput_Notes.md - Notes on specifying user-defined inputs in DFE2_0_UserInput.py. 
+
 -----
 Examples
 -----
