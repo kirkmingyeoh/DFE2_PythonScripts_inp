@@ -43,7 +43,7 @@ for n_nodelist_nodes in range(len(NodeList_U1)): # Loop through selected macrosc
 U2 = [] # List to store U2 of selected macroscale nodes
 NodeList_U2 = [14,33,51] # Selected macroscale nodes
 for n_nodelist_nodes in range(len(NodeList_U2)): # Loop through selected macroscale nodes
-    U2.append(odb.steps['Step-1'].frames[-1].fieldOutputs['U'].getSubset(region=Inst.nodes[NodeList_U2[n_nodelist_nodes]-1]).values[0].data[1]) # Store U1 of the selected macroscale nodes
+    U2.append(odb.steps['Step-1'].frames[-1].fieldOutputs['U'].getSubset(region=Inst.nodes[NodeList_U2[n_nodelist_nodes]-1]).values[0].data[1]) # Store U2 of the selected macroscale nodes
 
 odb.close() # Close the ODB file
 
