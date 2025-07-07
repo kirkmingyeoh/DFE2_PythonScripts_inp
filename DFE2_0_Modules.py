@@ -118,7 +118,8 @@ def SortMacroNodes(MacroNodalConnect,MacroNodalCoord,Macro_Dim,Sort):
             NodalCoordY.append(TempCoordY) # Add the nodal y coordinates list of the current macroscale element to the main list
             if Macro_Dim == 3: # For 3D RVEs
                 NodalCoordZ.append(TempCoordZ) # Add the nodal y coordinates list of the current macroscale element to the main list
-            
+
+## Below two options to be added
 #        elif Sort == 'global': # Align macroscale elements' natural coordinates with global coordinates as much as possible
 #            sss
 #        elif Sort == 'user': # User-defined sorting method
