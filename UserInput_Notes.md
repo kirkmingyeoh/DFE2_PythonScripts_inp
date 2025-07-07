@@ -33,4 +33,5 @@ Tol
 Sort
 - Specify how the macroscale nodes are sorted
 - '' will use Abaqus' default nodal connectivity order; 'global' will align natural coordinates tsi,eta,zeta to global coordinates x,y,z respectively as much as possible;
-  'user' will follow a user-defined method which the user would need to specify in SortMacroNodes module in DFE2_0_Modules.py
+  'user' will follow a user-defined method which the user would need to specify in SortMacroNodes module in DFE2_0_Modules.py. The latter two options will be added in a 
+  future update
