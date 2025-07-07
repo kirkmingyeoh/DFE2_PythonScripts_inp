@@ -47,7 +47,7 @@ for n_nodelist_nodes in range(len(NodeList_U2)): # Loop through selected macrosc
 
 # Extract the y displacement (U2) of selected macroscale nodes
 U3 = [] # List to store U2 of selected macroscale nodes
-NodeList_U3 = [1,30,47,64,85] # Selected macroscale nodes 12
+NodeList_U3 = [12,30,47,64,85] # Selected macroscale nodes
 for n_nodelist_nodes in range(len(NodeList_U3)): # Loop through selected macroscale nodes
     U3.append(odb.steps['Step-1'].frames[-1].fieldOutputs['U'].getSubset(region=Inst.nodes[NodeList_U3[n_nodelist_nodes]-1]).values[0].data[2]) # Store U3 of the selected macroscale nodes
 
