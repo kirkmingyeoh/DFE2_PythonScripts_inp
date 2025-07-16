@@ -707,19 +707,3 @@ def DelTempFiles():
     os.remove('Sets.dat')
     os.remove('Eqns.dat')
     os.remove('RVEMats.dat')
-            
-
-'''
-Revision log
-
-250630 Original release
-
-
-Proposed Revisions (yet to be implemented)
-Update SortMacroNodes with 'global' and 'user' options
-Update MPC to take in no. of RVE and Macro DOFs as an input for looping, to account for additional physics
-Update RVEPartInst to optionally include the rotation transformation for the RVE Instances
-Update DelTempFiles to check for the presence of the files before deleting, to account for the possibility that some files are added/removed for certain uses
-- Maybe pass in a list of files to be looped?
-'''
-
