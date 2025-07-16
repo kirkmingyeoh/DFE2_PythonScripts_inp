@@ -19,26 +19,3 @@ NewInpName = 'DFE2_2D.inp' # Name of new Direct FE2 input file
 GP = ''
 Tol = 1e-6
 Sort = ''
-
-
-'''
-Revision log
-
-250526 Original release
-
-250630 Revision
-Moved all explanatory notes to another document for conciseness 
-Added Sort as new input for users to define the order to sort the macroscale nodes
-
-End of 250630 Revision
-
-End of Revision
-'''
-
-
-
-
-
-
-
-
